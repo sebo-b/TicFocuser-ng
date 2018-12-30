@@ -1,7 +1,7 @@
 # TicFocuser
-INDI Driver for USB focuser (TIC)
+INDI Driver for USB focuser (Tic)
 
-With the TIC Focuser driver, stepper motors can be controlled thru the Pololu TIC controller (like Tic T825) via the KStars - Ekos platform directly using the USB interface. This can simplify the set-up, as no longer an ARDUINO or similar microcontrollers are needed in-between the stepper controller and the INDI server. 
+With the Tic Focuser driver, stepper motors can be controlled thru the Pololu Tic controller (like Tic T825) via the KStars - Ekos platform directly using the USB interface. This can simplify the set-up, as no longer an ARDUINO or similar microcontrollers are needed in-between the stepper controller and the INDI server. 
 
 This project was inspired by Radek Kaczorek's "astroberry-diy" drivers, designed for the Raspberry Pi and similar single board computers. See his repository for reference: https://github.com/rkaczorek/astroberry-diy
 
@@ -21,9 +21,9 @@ Also to be observed: The TIC has a timeout feature, unless disabled, will stopp 
 5) $ make
 6) $ sudo make install
 
-To use this driver, open in KStars the profile editor and enter TIC Focuser for the focuser driver.
+To use this driver, open in KStars the profile editor and enter Tic Focuser for the focuser driver.
 
-I have written and tested this program using the Tic T825 controller. For my nema17 stepper with gearbox, I have also updated the current limit in the a.m. TIC control center. Please be careful and also read related section in the Userguide, before touching.
+I have written and tested this program using the Tic T825 controller. For my nema17 stepper with gearbox, I have also updated the current limit in the a.m. Tic control center. Please be careful and also read related section in the Userguide, before touching.
 
 Disclaimer:
 
