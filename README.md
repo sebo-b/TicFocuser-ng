@@ -27,4 +27,4 @@ I have written and tested this program using the Tic T825 controller. For my nem
 
 Disclaimer:
 
-All of this has been working fine for me. I am neither a professional programmer nor an electrician and cannot tell wether it works in general, or in worst case could cause any damage to you or your equipment. Using this repository is at your own risk.
+All of this has been working fine for me. I am neither a professional programmer nor an electrician and cannot tell whether it works in general, or in worst case could cause any damage to you or your equipment. Using this repository is at your own risk.
