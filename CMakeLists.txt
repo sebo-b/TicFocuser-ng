@@ -4,77 +4,39 @@ if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)
 endif(COMMAND cmake_policy)
 
-PROJECT(astroberry CXX C)
+PROJECT(astromate CXX C)
 include(ExternalProject)
 
-set (VERSION_MAJOR 2)
-set (VERSION_MINOR 3)
+set (VERSION_MAJOR 1)
+set (VERSION_MINOR 0)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/")
 set(BIN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/bin")
 set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
 
-option(WITH_WIRINGPI "Use WiringPi as a low level hardware library" OFF)
-
 find_package(INDI REQUIRED)
+find_package(PkgConfig)
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/indi_rpifocus.xml.cmake ${CMAKE_CURRENT_BINARY_DIR}/indi_rpifocus.xml)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/indi_rpibrd.xml.cmake ${CMAKE_CURRENT_BINARY_DIR}/indi_rpibrd.xml)
+pkg_check_modules(LIBTIC REQUIRED libpololu-tic-1)
+string (REPLACE ";" " " LIBTIC_CFLAGS "${LIBTIC_CFLAGS}")
+string (REPLACE ";" " " LIBTIC_LDFLAGS "${LIBTIC_LDFLAGS}")
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${INDI_INCLUDE_DIR})
+#set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${LIBTIC_CFLAGS}")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_CFLAGS} ${LIBTIC_CFLAGS}")
 
-#include_directories(${CMAKE_SOURCE_DIR}/libs/bcm2835-1.52/src)
-#include_directories(${CMAKE_SOURCE_DIR}/../gpio_lib_c/wiringPi)
 
-#add_library(bcm2835 STATIC IMPORTED)
-#set_property(TARGET bcm2835 PROPERTY IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/libs/bcm2835-1.52/src/libbcm2835.a)
-#add_dependencies(bcm2835 libbcm2835 wiringPi)
+#configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h )
 
-if(WITH_WIRINGPI)
-	include_directories(${CMAKE_SOURCE_DIR}/../gpio_lib_c/wiringPi)
-	add_definitions(-DWIRINGPI)
-	set (ASTROBERRY_LIBRARIES "wiringPi")
-else()
-	include_directories(${CMAKE_SOURCE_DIR}/libs/bcm2835-1.52/src)
-	add_library(bcm2835 STATIC IMPORTED)
-	set_property(TARGET bcm2835 PROPERTY IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/libs/bcm2835-1.52/src/libbcm2835.a)
-	add_dependencies(bcm2835 libbcm2835)
-	set (ASTROBERRY_LIBRARIES "bcm2835")
+include_directories( ${CMAKE_CURRENT_BINARY_DIR})
+include_directories( ${CMAKE_CURRENT_SOURCE_DIR})
+include_directories( ${INDI_INCLUDE_DIR})
 
-	ExternalProject_Add(libbcm2835
-		URL "http://www.airspayce.com/mikem/bcm2835/bcm2835-1.52.tar.gz"
-		SOURCE_DIR ${CMAKE_SOURCE_DIR}/libs/bcm2835-1.52
-		PREFIX ${CMAKE_CURRENT_BINARY_DIR}/bcm2835-1.52
-		CONFIGURE_COMMAND ./configure
-		BUILD_COMMAND ${MAKE}
-		INSTALL_COMMAND ""
-		BUILD_IN_SOURCE 1
-	)
-endif()
-
-################ Astroberry Focuser ################
-
-set(indi_rpifocus_SRCS
-        ${CMAKE_CURRENT_SOURCE_DIR}/rpi_focus.cpp
+set(indi_ticfocus_SRCS
+        ${CMAKE_CURRENT_SOURCE_DIR}/tic_focus.cpp
    )
 
-add_executable(indi_rpifocus ${indi_rpifocus_SRCS})
-#target_link_libraries(indi_rpifocus indidriver bcm2835 wiringPi crypt)
-target_link_libraries(indi_rpifocus indidriver ${ASTROBERRY_LIBRARIES})
-install(TARGETS indi_rpifocus RUNTIME DESTINATION bin )
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/indi_rpifocus.xml DESTINATION ${INDI_DATA_DIR})
+add_executable(indi_ticfocus ${indi_ticfocus_SRCS})
+target_link_libraries(indi_ticfocus indidriver "${LIBTIC_LDFLAGS}")
+install(TARGETS indi_ticfocus RUNTIME DESTINATION bin )
+install(FILES indi_ticfocus.xml DESTINATION ${INDI_DATA_DIR})
 
-################ Astroberry Board ################
-
-set(indi_rpibrd_SRCS
-        ${CMAKE_CURRENT_SOURCE_DIR}/rpi_brd.cpp
-   )
-
-add_executable(indi_rpibrd ${indi_rpibrd_SRCS})
-#target_link_libraries(indi_rpibrd indidriver bcm2835 wiringPi crypt)
-target_link_libraries(indi_rpibrd indidriver ${ASTROBERRY_LIBRARIES})
-install(TARGETS indi_rpibrd RUNTIME DESTINATION bin )
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/indi_rpibrd.xml DESTINATION ${INDI_DATA_DIR})

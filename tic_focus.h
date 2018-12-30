@@ -16,18 +16,40 @@
  Boston, MA 02110-1301, USA.
 *******************************************************************************/
 
-#ifndef FOCUSRPI_H
-#define FOCUSRPI_H
+//#ifndef FOCUSRPI_H
+//#define FOCUSRPI_H
+#ifndef FOCUSTIC_H
+#define FOCUSTIC_H
+
 
 #include <indifocuser.h>
 
-class FocusRpi : public INDI::Focuser
+class FocusTic : public INDI::Focuser
+//class FocusRpi : public INDI::Focuser
 {
-    public:
-        FocusRpi();
-        virtual ~FocusRpi();
+    protected:
+    private:
+        ISwitch FocusResetS[1];
+        ISwitchVectorProperty FocusResetSP;
 
+        ISwitch StepModeS[2];
+        ISwitchVectorProperty StepModeSP;
+        
+        ISwitch FocusParkingS[2];
+        ISwitchVectorProperty FocusParkingSP;
+ 
+	INumber FocusBacklashN[1];
+	INumberVectorProperty FocusBacklashNP; 
+    public:
+        //FocusRpi();
+        //virtual ~FocusRpi();
+        FocusTic();
+        virtual ~FocusTic();
         const char *getDefaultName();
+
+        // Logik nächste beiden Zeilen?
+        typedef enum { FOCUS_HALF_STEP, FOCUS_FULL_STEP } FocusStepMode;
+        bool setStepMode(FocusStepMode mode);
 
         virtual bool Connect();
         virtual bool Disconnect();
@@ -39,35 +61,10 @@ class FocusRpi : public INDI::Focuser
         virtual bool ISNewSwitch (const char *dev, const char *name, ISState *states, char *names[], int n);
         virtual bool ISSnoopDevice(XMLEle *root);
         virtual bool saveConfigItems(FILE *fp);
-    protected:
-		virtual IPState MoveFocuser(FocusDirection dir, int speed, int duration);
+        virtual IPState MoveFocuser(FocusDirection dir, int speed, int duration);
         virtual IPState MoveAbsFocuser(int ticks);
         virtual IPState MoveRelFocuser(FocusDirection dir, int ticks);
-        virtual bool ReverseFocuser(bool enabled);
-		virtual bool AbortFocuser();
-        virtual void TimerHit();
-    private: 
-		INumber FocusBacklashN[1];
-		INumberVectorProperty FocusBacklashNP;
-		
-		INumber FocusResolutionN[1];
-		INumberVectorProperty FocusResolutionNP;
-
-		INumber FocusStepDelayN[1];
-		INumberVectorProperty FocusStepDelayNP;
-		
-        ISwitch MotorDirS[2];
-        ISwitchVectorProperty MotorDirSP;	
-
-        ISwitch MotorBoardS[2];
-        ISwitchVectorProperty MotorBoardSP;	
-
-		INumber MotorStandbyN[1];
-		INumberVectorProperty MotorStandbyNP;
-
-        virtual int SetResolution(int speed);
-        virtual int regPosition(int pos);
-        int timerID { -1 };
+        virtual bool SetSpeed(int speed);
 };
 
 #endif
