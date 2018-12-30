@@ -12,11 +12,11 @@ https://github.com/pololu/pololu-tic-software
 Please also take note of the instructions provided in the Userguide:
 https://www.pololu.com/docs/0J71/3.2
 
-Also to be observed: The TIC has a timeout feature, unless diabled, will stopp the motor after about 1 second. This is also explained in the above guide, see chapter 12.1. To overcome: Open the TIC control center (ticgui) and uncheck "enable command time  out". I have added the ticgui in the autostart folder (Ubuntu 18.04.)
+Also to be observed: The TIC has a timeout feature, unless disabled, will stopp the motor after about 1 second. This is also explained in the above guide, see chapter 12.1. To overcome: Open the TIC control center (ticgui) and uncheck "enable command time  out". I have added the ticgui in the autostart folder (Ubuntu 18.04.)
 
 To use this driver, open in KStars the profile editor and enter TIC Focuser for the focuser driver.
 
-I have written and tested this program using the Tic T825 controller. For my nema17 stepper with gearbox, I have also update the current limit in the a.m. TIC control center. Please be careful and also read related section in the Userguide, before touching.
+I have written and tested this program using the Tic T825 controller. For my nema17 stepper with gearbox, I have also updated the current limit in the a.m. TIC control center. Please be careful and also read related section in the Userguide, before touching.
 
 Disclaimer:
 
