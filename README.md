@@ -1,7 +1,7 @@
 # TicFocuser
 INDI Driver for USB focuser (TIC)
 
-With the TIC focuser, the Pololu TIC controllers can be addressed via the KStars - Ekos platform via USB. 
+With the TIC Focuser, the Pololu TIC controllers (like Tic T825) can be addressed via the KStars - Ekos platform via USB. 
 
 This project was inspired by Radek Kaczorek's "astroberry-diy" drivers, designed for the Raspberry Pi and similar single board computers. See his repository for reference: https://github.com/rkaczorek/astroberry-diy
 
