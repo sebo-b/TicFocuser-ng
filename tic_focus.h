@@ -1,5 +1,5 @@
 /*******************************************************************************
-  Copyright(c) 2014 Radek Kaczorek  <rkaczorek AT gmail DOT com>
+  Copyright(c) 2019 Helge Kutzop
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Library General Public
@@ -16,8 +16,6 @@
  Boston, MA 02110-1301, USA.
 *******************************************************************************/
 
-//#ifndef FOCUSRPI_H
-//#define FOCUSRPI_H
 #ifndef FOCUSTIC_H
 #define FOCUSTIC_H
 
@@ -25,7 +23,7 @@
 #include <indifocuser.h>
 
 class FocusTic : public INDI::Focuser
-//class FocusRpi : public INDI::Focuser
+
 {
     protected:
     private:
@@ -41,13 +39,11 @@ class FocusTic : public INDI::Focuser
 	INumber FocusBacklashN[1];
 	INumberVectorProperty FocusBacklashNP; 
     public:
-        //FocusRpi();
-        //virtual ~FocusRpi();
+        
         FocusTic();
         virtual ~FocusTic();
         const char *getDefaultName();
-
-        // Logik nächste beiden Zeilen?
+	
         typedef enum { FOCUS_HALF_STEP, FOCUS_FULL_STEP } FocusStepMode;
         bool setStepMode(FocusStepMode mode);
 
