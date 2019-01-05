@@ -139,7 +139,7 @@ void ISSnoopDevice (XMLEle *root)
 
 FocusTic::FocusTic()
 {
-	setVersion(2,1);
+	setVersion(1,0);
         FI::SetCapability(FOCUSER_CAN_ABS_MOVE | FOCUSER_CAN_REL_MOVE); 
 }
 
