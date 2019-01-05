@@ -3,7 +3,7 @@
 <devGroup group="Focusers">
 	<device label="TIC Focuser">
 		<driver name="TicFocuser">indi_ticfocus</driver>
-                <version>2.1</version>
+                <version>1.0</version>
 	</device>
 </devGroup>
 </driversList>
