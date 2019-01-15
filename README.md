@@ -5,6 +5,10 @@ With the Tic Focuser driver, stepper motors can be controlled thru the Pololu Ti
 
 This project was inspired by Radek Kaczorek's "astroberry-diy" drivers, designed for the Raspberry Pi and similar single board computers. See his repository for reference: https://github.com/rkaczorek/astroberry-diy
 
+First, please install the INDI Library Repository:
+
+https://github.com/indilib/indi
+
 Strictly required is the implementation of the Tic software, see following link:
 
 https://github.com/pololu/pololu-tic-software
