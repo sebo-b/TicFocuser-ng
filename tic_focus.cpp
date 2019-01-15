@@ -31,7 +31,7 @@ using namespace tic;
 using namespace std;
 handle hnd;
 
-// We declare an auto pointer to focusRpi.
+// We declare an auto pointer to focusTic.
 std::unique_ptr<FocusTic> focusTic(new FocusTic());
 
 #define MAX_STEPS 10000 // maximum steps focuser can travel from min=0 to max
