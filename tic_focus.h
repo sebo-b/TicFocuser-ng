@@ -60,7 +60,6 @@ class FocusTic : public INDI::Focuser
         virtual IPState MoveFocuser(FocusDirection dir, int speed, int duration);
         virtual IPState MoveAbsFocuser(int ticks);
         virtual IPState MoveRelFocuser(FocusDirection dir, int ticks);
-        virtual bool SetSpeed(int speed);
 };
 
 #endif

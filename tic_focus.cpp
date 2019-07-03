@@ -500,8 +500,6 @@ IPState FocusTic::MoveAbsFocuser(int targetTicks)
 	FocusAbsPosNP.s = IPS_BUSY;
 	IDSetNumber(&FocusAbsPosNP, NULL);
 
-	SetSpeed(2);
-        
     // set direction
 
     const char* direction;    
@@ -531,6 +529,4 @@ IPState FocusTic::MoveAbsFocuser(int targetTicks)
     return IPS_OK;
 }
 
-bool FocusTic::SetSpeed(int speed)
-{}
 
