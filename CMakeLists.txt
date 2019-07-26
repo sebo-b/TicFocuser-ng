@@ -33,6 +33,7 @@ include_directories( ${INDI_INCLUDE_DIR})
 
 set(indi_ticfocus_SRCS
         ${CMAKE_CURRENT_SOURCE_DIR}/tic_focus.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tic_connection.cpp
    )
 
 add_executable(indi_ticfocus ${indi_ticfocus_SRCS})

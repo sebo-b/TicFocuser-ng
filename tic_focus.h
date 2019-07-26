@@ -1,5 +1,7 @@
 /*******************************************************************************
+  Copyright(c) 2019 Sebastian Baberowski
   Copyright(c) 2019 Helge Kutzop
+  Copyright(c) 2014 Radek Kaczorek  <rkaczorek AT gmail DOT com>
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Library General Public
@@ -19,47 +21,59 @@
 #ifndef FOCUSTIC_H
 #define FOCUSTIC_H
 
-
 #include <indifocuser.h>
+#include "tic.h"
 
 class FocusTic : public INDI::Focuser
-
-{
-    protected:
-    private:
-        ISwitch FocusResetS[1];
-        ISwitchVectorProperty FocusResetSP;
-
-        ISwitch StepModeS[2];
-        ISwitchVectorProperty StepModeSP;
-        
-        ISwitch FocusParkingS[2];
-        ISwitchVectorProperty FocusParkingSP;
- 
-	INumber FocusBacklashN[1];
-	INumberVectorProperty FocusBacklashNP; 
+{ 
     public:
         
         FocusTic();
         virtual ~FocusTic();
+
         const char *getDefaultName();
 	
-        typedef enum { FOCUS_HALF_STEP, FOCUS_FULL_STEP } FocusStepMode;
+        typedef enum { 
+            FOCUS_FULL_STEP = TIC_STEP_MODE_MICROSTEP1,
+            FOCUS_HALF_STEP = TIC_STEP_MODE_MICROSTEP2,
+            FOCUS_1_4_STEP  = TIC_STEP_MODE_MICROSTEP4,
+            FOCUS_1_8_STEP  = TIC_STEP_MODE_MICROSTEP8,
+        } FocusStepMode;
+
         bool setStepMode(FocusStepMode mode);
 
         virtual bool Connect();
         virtual bool Disconnect();
         virtual bool initProperties();
         virtual bool updateProperties();        
-        void ISGetProperties (const char *dev);
+
+        bool ISNewNumber (const char *dev, const char *name, double values[], char *names[], int n);
+        bool ISNewSwitch (const char *dev, const char *name, ISState *states, char *names[], int n);
+        bool ISNewText(const char *dev, const char *name, char *texts[], char *names[], int n);
+
+        bool saveConfigItems(FILE *fp);
+        IPState MoveFocuser(FocusDirection dir, int speed, int duration);
+        IPState MoveAbsFocuser(int ticks);
+        IPState MoveRelFocuser(FocusDirection dir, int ticks);
+
+    private:
+
+        // TODO: check what it is
+        ISwitch FocusResetS[1];
+        ISwitchVectorProperty FocusResetSP;
+
+        ISwitch StepModeS[4];
+        ISwitchVectorProperty StepModeSP;
         
-        virtual bool ISNewNumber (const char *dev, const char *name, double values[], char *names[], int n);
-        virtual bool ISNewSwitch (const char *dev, const char *name, ISState *states, char *names[], int n);
-        virtual bool ISSnoopDevice(XMLEle *root);
-        virtual bool saveConfigItems(FILE *fp);
-        virtual IPState MoveFocuser(FocusDirection dir, int speed, int duration);
-        virtual IPState MoveAbsFocuser(int ticks);
-        virtual IPState MoveRelFocuser(FocusDirection dir, int ticks);
+        ISwitch FocusParkingS[2];
+        ISwitchVectorProperty FocusParkingSP;
+
+        IText TicSerialNumberT[1];
+        ITextVectorProperty TicSerialNumberTP;
+
+        INumber dbgN[1];
+        INumberVectorProperty dbgNP;
+
 };
 
 #endif

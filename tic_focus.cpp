@@ -1,6 +1,8 @@
 
 /*******************************************************************************
-  Copyright(c) 2019 Helge Kutzop 
+  Copyright(c) 2019 Sebastian Baberowski
+  Copyright(c) 2019 Helge Kutzop
+  Copyright(c) 2014 Radek Kaczorek  <rkaczorek AT gmail DOT com>
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Library General Public
@@ -20,25 +22,39 @@
 #include <unistd.h>
 #include <memory>
 #include <string.h>
-#include "tic_focus.h"
-#include <tic.hpp>
 #include <iostream>
-//neu
+
 #include <fstream>
 #include <string>
 
+#include "tic.hpp"
+
+#include "tic_focus.h"
+#include "tic_connection.h"
+
+// TODO: remove
 using namespace tic;
 using namespace std;
+
+// TODO: move to object
 handle hnd;
 
 // We declare an auto pointer to focusTic.
 std::unique_ptr<FocusTic> focusTic(new FocusTic());
 
+
+// TODO move to properties
 #define MAX_STEPS 10000 // maximum steps focuser can travel from min=0 to max
 #define STEP_DELAY 4 // miliseconds
 
-//Identify TIC device
 
+
+
+
+
+
+// TODO move to object
+//Identify TIC device
 handle open_handle(string desired_serial_number)
 {
   handle result = handle();
@@ -79,44 +95,24 @@ handle open_handle(string desired_serial_number)
   return result;
 } 
 
-void ISPoll(void *p);
-
-
-void ISInit()
-{
-   static int isInit = 0;
-
-   if (isInit == 1)
-       return;
-   if(focusTic.get() == 0)
-   {
-       isInit = 1;
-       focusTic.reset(new FocusTic());
-   }
-}
-
 void ISGetProperties(const char *dev)
 {
-        ISInit();
-        focusTic->ISGetProperties(dev);
+    focusTic->ISGetProperties(dev);
 }
 
 void ISNewSwitch(const char *dev, const char *name, ISState *states, char *names[], int num)
 {
-        ISInit();
-        focusTic->ISNewSwitch(dev, name, states, names, num);
+    focusTic->ISNewSwitch(dev, name, states, names, num);
 }
 
 void ISNewText(	const char *dev, const char *name, char *texts[], char *names[], int num)
 {
-        ISInit();
-        focusTic->ISNewText(dev, name, texts, names, num);
+    focusTic->ISNewText(dev, name, texts, names, num);
 }
 
 void ISNewNumber(const char *dev, const char *name, double values[], char *names[], int num)
 {
-        ISInit();
-        focusTic->ISNewNumber(dev, name, values, names, num);
+    focusTic->ISNewNumber(dev, name, values, names, num);
 }
 
 void ISNewBLOB (const char *dev, const char *name, int sizes[], int blobsizes[], char *blobs[], char *formats[], char *names[], int n)
@@ -133,44 +129,31 @@ void ISNewBLOB (const char *dev, const char *name, int sizes[], int blobsizes[],
 
 void ISSnoopDevice (XMLEle *root)
 {
-    ISInit();
     focusTic->ISSnoopDevice(root);
 }
 
 FocusTic::FocusTic()
 {
 	setVersion(1,0);
-        FI::SetCapability(FOCUSER_CAN_ABS_MOVE | FOCUSER_CAN_REL_MOVE); 
+    setSupportedConnections(CONNECTION_NONE);
+    FI::SetCapability(FOCUSER_CAN_ABS_MOVE | FOCUSER_CAN_REL_MOVE | FOCUSER_CAN_ABORT ); // TODO: implement can abort
 }
 
 FocusTic::~FocusTic()
 {
-
+    // TODO: free handle
 }
 
 const char * FocusTic::getDefaultName()
 {
-        return (char *)"TIC Focuser";
+    return (char *)"TIC Focuser";
 }
 
 bool FocusTic::Connect()
 {
-    // Start Work in Progress
-
-    string test_desired_serial_ID;
-    // the file "TIC_serial_ID" just contains a number, such as 1234
-    // purpose is to allow the user to capture here the TIC serial ID
-    // why specifying? in case the user runs more than one TIC, e.g. another TIC for the filter wheel
-    ifstream link_serial_ID ("/home/helge/TIC_serial_ID");
-    link_serial_ID.is_open();
-    getline(link_serial_ID, test_desired_serial_ID);
-    IDMessage(getDeviceName() , "Candidate is %s",test_desired_serial_ID.c_str());
-    link_serial_ID.close();
-
-    // End Work in Progress
-  
+    //TODO
+    //hnd = open_handle("");  
     IDMessage(getDeviceName(), "TicFocuser connected successfully.");
-    hnd = open_handle("");
     return true;
 }
 
@@ -184,7 +167,7 @@ bool FocusTic::Disconnect()
 	}
     
 	IDMessage(getDeviceName(), "TicFocuser disconnected successfully.");
-        return true;
+    return true;
 }
 
 bool FocusTic::initProperties()
@@ -194,10 +177,12 @@ bool FocusTic::initProperties()
     IUFillNumber(&FocusAbsPosN[0],"FOCUS_ABSOLUTE_POSITION","Ticks","%0.0f",0,MAX_STEPS,(int)MAX_STEPS/100,0);
     IUFillNumberVector(&FocusAbsPosNP,FocusAbsPosN,1,getDeviceName(),"ABS_FOCUS_POSITION","Position",MAIN_CONTROL_TAB,IP_RW,0,IPS_OK);
 
-        /* Step Mode */
-        IUFillSwitch(&StepModeS[0], "Half Step", "", ISS_OFF);
-        IUFillSwitch(&StepModeS[1], "Full Step", "", ISS_ON);
-        IUFillSwitchVector(&StepModeSP, StepModeS, 2, getDeviceName(), "Step Mode", "", OPTIONS_TAB, IP_RW, ISR_1OFMANY, 0, IPS_IDLE);
+    /* Step Mode */
+    IUFillSwitch(&StepModeS[0], "Full Step", "", ISS_ON);
+    IUFillSwitch(&StepModeS[1], "Half Step", "", ISS_OFF);
+    IUFillSwitch(&StepModeS[2], "1/4 Step", "", ISS_OFF);
+    IUFillSwitch(&StepModeS[3], "1/8 Step", "", ISS_OFF);
+    IUFillSwitchVector(&StepModeSP, StepModeS, 4, getDeviceName(), "Step Mode", "", OPTIONS_TAB, IP_RW, ISR_1OFMANY, 0, IPS_IDLE);
 
 	IUFillNumber(&PresetN[0], "Preset 1", "", "%0.0f", 0, MAX_STEPS, (int)(MAX_STEPS/100), 0);
 	IUFillNumber(&PresetN[1], "Preset 2", "", "%0.0f", 0, MAX_STEPS, (int)(MAX_STEPS/100), 0);
@@ -209,8 +194,18 @@ bool FocusTic::initProperties()
 	IUFillSwitch(&PresetGotoS[2], "Preset 3", "Preset 3", ISS_OFF);
 	IUFillSwitchVector(&PresetGotoSP, PresetGotoS, 3, getDeviceName(), "Presets Goto", "Goto", MAIN_CONTROL_TAB,IP_RW,ISR_1OFMANY,60,IPS_OK);
 
-	IUFillNumber(&FocusBacklashN[0], "FOCUS_BACKLASH_VALUE", "Steps", "%0.0f", 0, (int)(MAX_STEPS/100), (int)(MAX_STEPS/1000), 0);
-	IUFillNumberVector(&FocusBacklashNP, FocusBacklashN, 1, getDeviceName(), "FOCUS_BACKLASH", "Backlash", OPTIONS_TAB, IP_RW, 0, IPS_IDLE);
+    // TODO: add min/max position
+
+    // TODO: add serial number
+    IUFillText(TicSerialNumberT, "TIC_SERIAL", "Tic Serial Number", "");
+    IUFillTextVector(&TicSerialNumberTP, TicSerialNumberT, 1, getDeviceName(), "TIC_SERIAL", "Tic Serial Number", CONNECTION_TAB,
+                     IP_RW, 60, IPS_IDLE);
+    defineText(&TicSerialNumberTP);
+
+    IUFillNumber(&dbgN[0], "TIC_DBGN", "Tic debug", "%d",10,20,1,10);
+    IUFillNumberVector(&dbgNP, dbgN, 1, getDeviceName(), "TIC_DBGN_PROP", "Tic debug number", CONNECTION_TAB,
+                     IP_RW, 2, IPS_IDLE);
+    defineNumber(&dbgNP);
 
 	IUFillSwitch(&FocusResetS[0],"FOCUS_RESET","Reset",ISS_OFF);
 	IUFillSwitchVector(&FocusResetSP,FocusResetS,1,getDeviceName(),"FOCUS_RESET","Position Reset",OPTIONS_TAB,IP_RW,ISR_1OFMANY,60,IPS_OK);
@@ -219,17 +214,11 @@ bool FocusTic::initProperties()
 	IUFillSwitch(&FocusParkingS[1],"FOCUS_PARKOFF","Disable",ISS_OFF);
 	IUFillSwitchVector(&FocusParkingSP,FocusParkingS,2,getDeviceName(),"FOCUS_PARK","Parking Mode",OPTIONS_TAB,IP_RW,ISR_1OFMANY,60,IPS_OK);
 
+    TicConnection* ticC = new TicConnection(this);
+    registerConnection(ticC);
+
+
     return true;
-}
-
-void FocusTic::ISGetProperties (const char *dev)
-{
-    INDI::Focuser::ISGetProperties(dev);
-
-    /* Add debug controls so we may debug driver if necessary */
-    addDebugControl();
-
-    return;
 }
 
 bool FocusTic::updateProperties()
@@ -237,23 +226,30 @@ bool FocusTic::updateProperties()
 
     INDI::Focuser::updateProperties();
 
+    // TODO: check
     if (isConnected())
     {
-		deleteProperty(FocusSpeedNP.name);
         defineNumber(&FocusAbsPosNP);
         defineSwitch(&FocusMotionSP);
         defineSwitch(&StepModeSP);
-		defineNumber(&FocusBacklashNP);
 		defineSwitch(&FocusParkingSP);
 		defineSwitch(&FocusResetSP);
+
+//        TicSerialNumberTP.p = IP_RO;
+//        deleteProperty(TicSerialNumberTP.name);
+//        defineText(&TicSerialNumberTP);
     }
     else
     {
         deleteProperty(FocusAbsPosNP.name);
         deleteProperty(FocusMotionSP.name);
-		deleteProperty(FocusBacklashNP.name);
+        deleteProperty(StepModeSP.name);
 		deleteProperty(FocusParkingSP.name);
 		deleteProperty(FocusResetSP.name);
+
+//        TicSerialNumberTP.p = IP_RW;
+//        deleteProperty(TicSerialNumberTP.name);
+//        defineText(&TicSerialNumberTP);
     }
 
     return true;
@@ -261,10 +257,20 @@ bool FocusTic::updateProperties()
 
 bool FocusTic::ISNewNumber (const char *dev, const char *name, double values[], char *names[], int n)
 {
+    // TODO: check and clean up
 	// first we check if it's for our device
 	if(strcmp(dev,getDeviceName())==0)
 	{
-
+        //TODO: remove
+        if (!strcmp(name, dbgNP.name))
+        {
+            IDMessage(getDeviceName(), "DBG number.");
+               IUUpdateNumber(&dbgNP,values,names,n);
+               dbgNP.s=IPS_OK;
+               IDSetNumber(&dbgNP, NULL);
+               return true;
+        }
+        
         // handle focus absolute position
         if (!strcmp(name, FocusAbsPosNP.name))
         {
@@ -295,39 +301,14 @@ bool FocusTic::ISNewNumber (const char *dev, const char *name, double values[], 
 			IDSetNumber(&FocusRelPosNP, NULL);
 			return true;
         }
-
-        // handle focus timer
-        if (!strcmp(name, FocusTimerNP.name))
-        {
-			IUUpdateNumber(&FocusTimerNP,values,names,n);
-
-			//FOCUS_INWARD
-            if ( FocusMotionS[0].s == ISS_ON )
-				MoveFocuser(FOCUS_INWARD, 0, FocusTimerN[0].value);
-
-			//FOCUS_OUTWARD
-            if ( FocusMotionS[1].s == ISS_ON )
-				MoveFocuser(FOCUS_OUTWARD, 0, FocusTimerN[0].value);
-
-			FocusTimerNP.s=IPS_OK;
-			IDSetNumber(&FocusTimerNP, NULL);
-			return true;
-        }
-
-        // handle focus backlash
-        if (!strcmp(name, FocusBacklashNP.name))
-        {
-            IUUpdateNumber(&FocusBacklashNP,values,names,n);
-            FocusBacklashNP.s=IPS_OK;
-            IDSetNumber(&FocusBacklashNP, "TicFocuser backlash set to %d", (int) FocusBacklashN[0].value);
-            return true;
-        }
 	}
+
     return INDI::Focuser::ISNewNumber(dev,name,values,names,n);
 }
 
 bool FocusTic::ISNewSwitch (const char *dev, const char *name, ISState *states, char *names[], int n)
 {
+    // TODO: check and clean up
     // first we check if it's for our device
     if (!strcmp(dev, getDeviceName()))
     {
@@ -417,10 +398,7 @@ bool FocusTic::ISNewSwitch (const char *dev, const char *name, ISState *states, 
                   IDSetSwitch(&StepModeSP, nullptr);
             }
  
-            if (target_mode == 0)
-                 rc = setStepMode(FOCUS_HALF_STEP);
-            else
-                 rc = setStepMode(FOCUS_FULL_STEP);
+            rc = setStepMode(static_cast<FocusStepMode>(target_mode));
   
             if (!rc)
             {
@@ -440,18 +418,37 @@ bool FocusTic::ISNewSwitch (const char *dev, const char *name, ISState *states, 
     return INDI::Focuser::ISNewSwitch(dev,name,states,names,n);
 }
 
-bool FocusTic::ISSnoopDevice (XMLEle *root)
+bool FocusTic::ISNewText(const char *dev, const char *name, char *texts[], char *names[], int n)
 {
-    return INDI::Focuser::ISSnoopDevice(root);
+    IDMessage(getDeviceName(), "SEBO: %s %s",dev,name);
+    if (!strcmp(dev, getDeviceName()))
+    {
+        if (!strcmp(name, TicSerialNumberTP.name)) {
+            IUUpdateText(&TicSerialNumberTP, texts, names, n);
+            TicSerialNumberTP.s = IPS_OK;
+            IDSetText(&TicSerialNumberTP, nullptr);
+
+            if (isConnected())
+                IDMessage(getDeviceName(), "You must reconnect TicFocuser.");
+
+            return true;
+        }
+    
+    }
+
+    return INDI::Focuser::ISNewText(dev,name,texts,names,n);
 }
 
 bool FocusTic::saveConfigItems(FILE *fp)
 {
+    Focuser::saveConfigItems(fp);
+
+    // TODO: check if only these
     IUSaveConfigNumber(fp, &FocusRelPosNP);
     IUSaveConfigNumber(fp, &PresetNP);
-    IUSaveConfigNumber(fp, &FocusBacklashNP);
 	IUSaveConfigSwitch(fp, &FocusParkingSP);
 
+    // TODO: possibly crappy thing
     if ( FocusParkingS[0].s == ISS_ON )
 		IUSaveConfigNumber(fp, &FocusAbsPosNP);
 
@@ -459,19 +456,21 @@ bool FocusTic::saveConfigItems(FILE *fp)
 }
 
 bool FocusTic::setStepMode(FocusStepMode mode)
-  {
-     if (mode == FOCUS_HALF_STEP)
-        hnd.set_step_mode(2);
-     else
-        hnd.set_step_mode(1);
-     return true;
-  }
+{
+    hnd.set_step_mode(mode);
+
+    return true;
+}
 
 
 IPState FocusTic::MoveFocuser(FocusDirection dir, int speed, int duration)
 {
-    int ticks = (int) ( duration / STEP_DELAY);
-    return 	MoveRelFocuser( dir, ticks);
+    INDI_UNUSED(dir);
+    INDI_UNUSED(speed);
+    INDI_UNUSED(duration);
+    DEBUGDEVICE(m_defaultDevice->getDeviceName(), INDI::Logger::DBG_ERROR, "Focuser does not support timer based motion.");
+
+    return IPS_ALERT;
 }
 
 
@@ -481,6 +480,8 @@ IPState FocusTic::MoveRelFocuser(FocusDirection dir, int ticks)
     return MoveAbsFocuser(targetTicks);
 }
 
+
+// TODO: clean up
 IPState FocusTic::MoveAbsFocuser(int targetTicks)
 {
 
@@ -517,6 +518,7 @@ IPState FocusTic::MoveAbsFocuser(int targetTicks)
 
     int ticks = abs(targetTicks - FocusAbsPosN[0].value);
 
+    // TODO: set speed
     hnd.exit_safe_start();
     hnd.set_target_position(targetTicks);
 
