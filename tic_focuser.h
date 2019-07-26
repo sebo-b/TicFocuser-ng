@@ -18,62 +18,55 @@
  Boston, MA 02110-1301, USA.
 *******************************************************************************/
 
-#ifndef FOCUSTIC_H
-#define FOCUSTIC_H
+#ifndef TICFOCUSER_H
+#define TICFOCUSER_H
 
 #include <indifocuser.h>
-#include "tic.h"
 
-class FocusTic : public INDI::Focuser
+class TicFocuser : public INDI::Focuser
 { 
     public:
         
-        FocusTic();
-        virtual ~FocusTic();
+        TicFocuser();
+        virtual ~TicFocuser();
 
-        const char *getDefaultName();
-	
+        const char *getDefaultName() {  return "TIC Focuser"; }
+
+/*	
         typedef enum { 
             FOCUS_FULL_STEP = TIC_STEP_MODE_MICROSTEP1,
             FOCUS_HALF_STEP = TIC_STEP_MODE_MICROSTEP2,
             FOCUS_1_4_STEP  = TIC_STEP_MODE_MICROSTEP4,
             FOCUS_1_8_STEP  = TIC_STEP_MODE_MICROSTEP8,
         } FocusStepMode;
-
-        bool setStepMode(FocusStepMode mode);
-
-        virtual bool Connect();
-        virtual bool Disconnect();
+*/
         virtual bool initProperties();
         virtual bool updateProperties();        
 
         bool ISNewNumber (const char *dev, const char *name, double values[], char *names[], int n);
         bool ISNewSwitch (const char *dev, const char *name, ISState *states, char *names[], int n);
-        bool ISNewText(const char *dev, const char *name, char *texts[], char *names[], int n);
 
         bool saveConfigItems(FILE *fp);
-        IPState MoveFocuser(FocusDirection dir, int speed, int duration);
-        IPState MoveAbsFocuser(int ticks);
-        IPState MoveRelFocuser(FocusDirection dir, int ticks);
+
+        IPState MoveFocuser(FocusDirection dir, int speed, uint16_t duration);
+        IPState MoveAbsFocuser(uint32_t ticks);
+        IPState MoveRelFocuser(FocusDirection dir, uint32_t ticks);
+        bool AbortFocuser();
+
+        // works only if Parking is enabled
+        IPState ParkFocuser();
 
     private:
-
-        // TODO: check what it is
-        ISwitch FocusResetS[1];
-        ISwitchVectorProperty FocusResetSP;
 
         ISwitch StepModeS[4];
         ISwitchVectorProperty StepModeSP;
         
-        ISwitch FocusParkingS[2];
-        ISwitchVectorProperty FocusParkingSP;
+        ISwitch FocusParkingModeS[2];
+        ISwitchVectorProperty FocusParkingModeSP;
 
-        IText TicSerialNumberT[1];
-        ITextVectorProperty TicSerialNumberTP;
-
-        INumber dbgN[1];
-        INumberVectorProperty dbgNP;
+        ISwitch FocusParkS[1];
+        ISwitchVectorProperty FocusParkSP;
 
 };
 
-#endif
+#endif // TICFOCUSER_H

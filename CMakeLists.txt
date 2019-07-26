@@ -31,13 +31,13 @@ include_directories( ${CMAKE_CURRENT_BINARY_DIR})
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR})
 include_directories( ${INDI_INCLUDE_DIR})
 
-set(indi_ticfocus_SRCS
-        ${CMAKE_CURRENT_SOURCE_DIR}/tic_focus.cpp
+set(indi_ticfocuser_SRCS
+        ${CMAKE_CURRENT_SOURCE_DIR}/tic_focuser.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tic_connection.cpp
    )
 
-add_executable(indi_ticfocus ${indi_ticfocus_SRCS})
-target_link_libraries(indi_ticfocus indidriver "${LIBTIC_LDFLAGS}")
-install(TARGETS indi_ticfocus RUNTIME DESTINATION bin )
-install(FILES indi_ticfocus.xml DESTINATION ${INDI_DATA_DIR})
+add_executable(indi_ticfocuser ${indi_ticfocuser_SRCS})
+target_link_libraries(indi_ticfocuser indidriver "${LIBTIC_LDFLAGS}")
+install(TARGETS indi_ticfocuser RUNTIME DESTINATION bin )
+install(FILES indi_ticfocuser.xml DESTINATION ${INDI_DATA_DIR})
 

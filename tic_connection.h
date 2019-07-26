@@ -21,20 +21,34 @@
 
 #include <connectionplugins/connectioninterface.h>
 
+struct tic_handle;
+
 class TicConnection: public Connection::Interface {
     
     public:
+
+        TicConnection(INDI::DefaultDevice *dev);
+        ~TicConnection();
         
         bool Connect();
         bool Disconnect();
         void Activated();
         void Deactivated();
 
+        bool ISNewText(const char *dev, const char *name, char *texts[], char *names[], int n);
+
+        tic_handle* getHandle() { return handle; }
+
         std::string name() { return "TicFocuser USB Connection"; };
         std::string label() { return "TicUSB"; };
 
-        TicConnection(INDI::DefaultDevice *dev);
-        ~TicConnection();
+    private:
+
+        tic_handle* handle;
+
+        IText TicSerialNumberT[1] {};
+        ITextVectorProperty TicSerialNumberTP;
+
 };
 
 #endif // TICCONNECTION_H
