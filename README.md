@@ -52,7 +52,22 @@ Add `TicFocuser` to INDI profile in KStars and you are good to go.
 
 # Hardware
 
-TODO
+### What will you need
+1. Tic Motor controller (without gold pins). I used T825 which looks like that:
+
+![T825](https://raw.githubusercontent.com/sebo-b/TicFocuser/refactor/extras/tic825.jpg)
+
+2. NEMA-17 stepper motor. I'm using an equivalent of [Pololu #2267][https://www.pololu.com/product/2267].
+
+![NEMA17](https://raw.githubusercontent.com/sebo-b/TicFocuser/refactor/extras/nama17.jpg)
+
+3. Possibility to 3D print the case.
+4. DC Barrel Power Jack Socket 5.5mm/2.1mm.
+
+![DC](https://raw.githubusercontent.com/sebo-b/TicFocuser/refactor/extras/dc_barrel.jpg)
+
+5. Basic ironing skills.
+6. A way to connect the stepper motor to your focuser.
 
 # Disclaimer
 
