@@ -1,7 +1,7 @@
 # TicFocuser v2
 INDI Driver for USB focuser based on Pololu Tic controller.
 
-This project was initially a fork of TicFocuser driver written by Helge Kutzop and published on [GitHub][https://github.com/HelgeMK/TicFocuser] as it seemed that the author is not maintaining it anymore. However, the refactor of code was such deep, that I'm not sure if a single line of the original code stayed in this version. Helge was basing his version on Radek Kaczorek's "astroberry-diy" drivers published on [GitHub][https://github.com/rkaczorek/astroberry-diy]. As said I'm quite certain that all old code was rewritten, nevertheless to respect both authors I kept their names in AUTHORS file.
+This project was initially a fork of TicFocuser driver written by Helge Kutzop and published on [GitHub](https://github.com/HelgeMK/TicFocuser) as it seemed that the author is not maintaining it anymore. However, the refactor of code was such deep, that I'm not sure if a single line of the original code stayed in this version. Helge was basing his version on Radek Kaczorek's "astroberry-diy" drivers published on [GitHub](https://github.com/rkaczorek/astroberry-diy). As said I'm quite certain that all old code was rewritten, nevertheless to respect both authors I kept their names in AUTHORS file.
 
 # Whys
 
@@ -22,7 +22,7 @@ This is a driver for a great framework: INDI. INDI together with KStars is opens
 
 1. You need INDI library installed together with headers. Most of Linux distributions have it in the repo. To install it on Arch simply type `pacman -S libindi`
 
-2. You need Pololu Tic library. You can find instructions how to download it and compile on [Pololu site][https://www.pololu.com/docs/0J71]. On Arch you can use AUR package created by myself available [here][https://aur.archlinux.org/packages/pololu-tic-software/].
+2. You need Pololu Tic library. You can find instructions how to download it and compile on [Pololu site](https://www.pololu.com/docs/0J71). On Arch you can use AUR package created by myself available [here](https://aur.archlinux.org/packages/pololu-tic-software/).
 
 ### Compilation
 
@@ -34,7 +34,7 @@ $ cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr ..
 $ make
 $ sudo make install
 ```
-To automatically create Arch package you can use AUR package created by myself available [here][https://aur.archlinux.org/packages/libindi-ticfocuser/].
+To automatically create Arch package you can use AUR package created by myself available [here](https://aur.archlinux.org/packages/libindi-ticfocuser/).
 
 ### Configure Pololu Tic
 
@@ -42,7 +42,7 @@ If you haven't do so, execute `ticgui` and properly configure Tic controller.
 At minimum:
 * Select current limit for you step motor.
 * Select speed and acceleration.
-* Uncheck `Enable command timeout` checkbox in the `Serial` box. More info abt in in [Pololu Documentation in chapter 4.4][https://www.pololu.com/docs/0J71/all#4.4]. 
+* Uncheck `Enable command timeout` checkbox in the `Serial` box. More info abt in in [Pololu Documentation in chapter 4.4](https://www.pololu.com/docs/0J71/all#4.4). 
 
 These parameters are not controlled by this driver.
 
