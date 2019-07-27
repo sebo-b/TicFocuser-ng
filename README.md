@@ -38,17 +38,18 @@ To automatically create Arch package you can use AUR package created by myself a
 
 ### Configure Pololu Tic
 
-If you haven't do so, execute `ticgui` and properly configure Tic controller. Motor parameters are not controlled by TicFocuser driver.
+If you haven't do so, execute `ticgui` and properly configure Tic controller. For various reasons motor parameters are not controlled by TicFocuser driver.
+
 At minimum:
 * Configure your motor parameters like: current limit, step mode, speed, acceleration, etc.
 
 ![ticcmd](https://raw.githubusercontent.com/sebo-b/TicFocuser/refactor/extras/ticgui_motorsettings.png)
 
-* Uncheck `Enable command timeout` checkbox in the `Serial` box. More info abt in in [Pololu Documentation in chapter 4.4](https://www.pololu.com/docs/0J71/all#4.4). 
+* Uncheck `Enable command timeout` checkbox in the `Serial` box. More info abt it in [chapter 4.4 of Pololu Tic documentation](https://www.pololu.com/docs/0J71/all#4.4). 
 
 * Test from `ticgui` if your focuser works correctly.
 
-You can read more about setting up a proper motor parameters in [Tic documentation](https://www.pololu.com/docs/0J71/all#4.3). In my setup I'm using current limit much lower than the rate of my motor because not much force is needed for my focuser, I save power and what's most important vibrations caused by motor are marginalised.
+You can read more about setting up proper motor parameters in [chapter 4.3 of Pololu Tic documentation](https://www.pololu.com/docs/0J71/all#4.3). In my setup I'm using current limit much lower than the rate of my motor because not much force is needed for my focuser, I save power and what's most important vibrations caused by the motor are marginalized.
 
 ### Configure KStars
 
