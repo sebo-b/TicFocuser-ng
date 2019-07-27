@@ -1,34 +1,59 @@
-# TicFocuser
-INDI Driver for USB focuser (Tic)
+# TicFocuser v2
+INDI Driver for USB focuser based on Pololu Tic controller.
 
-With the Tic Focuser driver, stepper motors can be controlled thru the Pololu Tic controller (like Tic T825) via the KStars - Ekos platform directly using the USB interface. This can simplify the set-up, as no longer an ARDUINO or similar microcontrollers are needed in-between the stepper controller and the INDI server. 
+This project was initially a fork of TicFocuser driver written by Helge Kutzop and published on [GitHub][https://github.com/HelgeMK/TicFocuser] as it seemed that the author is not maintaining it anymore. However, the refactor of code was such deep, that I'm not sure if a single line of the original code stayed in this version. Helge was basing his version on Radek Kaczorek's "astroberry-diy" drivers published on [GitHub][https://github.com/rkaczorek/astroberry-diy]. As said I'm quite certain that all old code was rewritten, nevertheless to respect both authors I kept their names in AUTHORS file.
 
-This project was inspired by Radek Kaczorek's "astroberry-diy" drivers, designed for the Raspberry Pi and similar single board computers. See his repository for reference: https://github.com/rkaczorek/astroberry-diy
+# Whys
 
-First, please install the INDI Library Repository:
+You may wonder why we have created another focuser as there are many already available on the market. Here are my reasons for it:
+* DIY focuser is much cheaper than a manufactured one.
+* DIY is more fun.
+* I wanted something small and simple for astrophotography, without an external controller.
+* I wanted a focuser which can be connected directly to a computer (PC, Laptop or RaspberryPi), so USB seemed to be the best choice.
+* I wanted something aesthetic.
 
-https://github.com/indilib/indi
+Pololu Tic controller fulfills all these needs, it is relatively cheap, small and among others, it supports USB (no need for GPIOs or extra Arduino).
 
-Strictly required is the implementation of the Tic software, see following link:
+# Software
 
-https://github.com/pololu/pololu-tic-software
+This is a driver for a great framework: INDI. INDI together with KStars is opensource, works natively on Linux and MacOS, and can fully control astrophotography sessions. I was using it on RaspberryPi 3B+ and later on, I switched to much more powerful Intel NUC mini-pc. 
 
-Please also take note of the instructions provided in the Pololu Tic Userguide:
-https://www.pololu.com/docs/0J71/3.2
+### Dependencies
 
-Also to be observed: The Pololu Tic has a timeout feature, unless disabled, will stopp the motor after about 1 second. This is also explained in the above guide, see chapter 12.1. To overcome: Open the Tic control center (ticgui) and uncheck "enable command time  out". I have added the ticgui in the autostart folder (Ubuntu 18.04.)
+1. You need INDI library installed together with headers. Most of Linux distributions have it in the repo. To install it on Arch simply type `pacman -S libindi`
 
-1) $ git clone https://github.com/HelgeMK/TicFocuser.git
-2) $ cd TicFocuser
-3) $ mkdir build && cd build
-4) $ cmake -DCMAKE_INSTALL_PREFIX=/usr ..
-5) $ make
-6) $ sudo make install
+2. You need Pololu Tic library. You can find instructions how to download it and compile on [Pololu site][https://www.pololu.com/docs/0J71]. On Arch you can use AUR package created by myself available [here][https://aur.archlinux.org/packages/pololu-tic-software/].
 
-To use this driver, open in KStars the profile editor and enter Tic Focuser for the focuser driver.
+### Compilation
 
-I have written and tested this program using the Pololu Tic T825 controller. For my nema17 stepper with gearbox, I have also updated the current limit in the a.m. Tic control center. Please be careful and also read related section in the Userguide, before touching.
+```
+$ git clone git@github.com:sebo-b/TicFocuser.git
+$ cd TicFocuser
+$ mkdir build && cd build
+$ cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr ..
+$ make
+$ sudo make install
+```
+To automatically create Arch package you can use AUR package created by myself available [here][https://aur.archlinux.org/packages/libindi-ticfocuser/].
 
-Disclaimer:
+### Configure Pololu Tic
 
-All of this has been working fine for me. I am neither a professional programmer nor an electrician and cannot tell whether it works in general, or in worst case could cause any damage to you or your equipment. Using this repository is at your own risk.
+If you haven't do so, execute `ticgui` and properly configure Tic controller. 
+At minimum:
+* Select current limit for you step motor.
+* Select speed and acceleration.
+* Uncheck `Enable command timeout` checkbox in the `Serial` box. More info abt in in [Pololu Documentation in chapter 4.4][https://www.pololu.com/docs/0J71/all#4.4]. 
+
+These parameters are not controlled by this driver.
+
+### Configure KStars
+
+Add `TicFocuser` to INDI profile in KStars and you are good to go.
+
+# Hardware
+
+TODO
+
+# Disclaimer
+
+This software is working fine for me on Arch Linux with INDI v1.7.9 on x86 and Tic T825. I haven't tested it on RaspberryPi as I switched from this platform. This software is not changing any electrical parameters of Tic controller configuration, however each software has bugs. I don't take any responsibility for it and you are using it at *your own risk*.
