@@ -69,6 +69,24 @@ Add `TicFocuser` to INDI profile in KStars and you are good to go.
 5. Basic ironing skills.
 6. A way to connect the stepper motor to your focuser.
 
+### 3D printed case
+
+Model of controller case looks like the following:
+
+![Case](https://raw.githubusercontent.com/sebo-b/TicFocuser/refactor/extras/case1.jpg)
+
+Case after printout mounted on the motor:
+
+![Case](https://raw.githubusercontent.com/sebo-b/TicFocuser/refactor/extras/case2.jpg)
+
+With all elements inside:
+
+![Case](https://raw.githubusercontent.com/sebo-b/TicFocuser/refactor/extras/case3.jpg)
+
+A project of the case is [attached as STL file](https://raw.githubusercontent.com/sebo-b/TicFocuser/refactor/extras/ticfocuser_case.stl) for 3D printer. Please just note that this file is in 10:1 scale, so it needs to be 10x rescaled down before printing. 
+
+Enjoy!
+
 # Disclaimer
 
 This software is working fine for me on Arch Linux with INDI v1.7.9 on x86 and Tic T825. I haven't tested it on RaspberryPi as I switched from this platform. This software is not changing any electrical parameters of Tic controller configuration, however each software has bugs. I don't take any responsibility for it and you are using it at *your own risk*.
