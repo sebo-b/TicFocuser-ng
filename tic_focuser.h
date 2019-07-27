@@ -50,11 +50,7 @@ class TicFocuser : public INDI::Focuser
 
     private:
 
-        static uint8_t ticStepModeConvert(int mode);
         bool lastTimerHitError; //< used to not flood user with the same error messge if it repeats
-
-        ISwitch StepModeS[4];
-        ISwitchVectorProperty StepModeSP;
         
         ISwitch FocusParkingModeS[2];
         ISwitchVectorProperty FocusParkingModeSP;

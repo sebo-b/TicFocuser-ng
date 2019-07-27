@@ -85,13 +85,6 @@ bool TicFocuser::initProperties()
 {
     INDI::Focuser::initProperties();
 
-    /* Step Mode */
-    IUFillSwitch(&StepModeS[0], "FULL_STEP", "Full Step", ISS_ON);
-    IUFillSwitch(&StepModeS[1], "HALF STEP", "Half Step", ISS_OFF);
-    IUFillSwitch(&StepModeS[2], "1_4_STEP", "1/4 Step", ISS_OFF);
-    IUFillSwitch(&StepModeS[3], "1_8_STEP", "1/8 Step", ISS_OFF);
-    IUFillSwitchVector(&StepModeSP, StepModeS, 4, getDeviceName(), "FOCUSER_STEP_MODE", "Step Mode", OPTIONS_TAB, IP_RW, ISR_1OFMANY, 0, IPS_IDLE);
-
 	IUFillSwitch(&FocusParkingModeS[0],"FOCUS_PARKON","Enable",ISS_OFF);
 	IUFillSwitch(&FocusParkingModeS[1],"FOCUS_PARKOFF","Disable",ISS_ON);
 	IUFillSwitchVector(&FocusParkingModeSP,FocusParkingModeS,2,getDeviceName(),"FOCUS_PARK_MODE","Parking Mode",OPTIONS_TAB,IP_RW,ISR_1OFMANY,60,IPS_IDLE);
@@ -109,12 +102,10 @@ bool TicFocuser::updateProperties()
 
     if (isConnected())
     {
-        defineSwitch(&StepModeSP);
         defineSwitch(&FocusParkingModeSP);
     }
     else
     {
-        deleteProperty(StepModeSP.name);
         deleteProperty(FocusParkingModeSP.name);
     }
 
@@ -135,21 +126,10 @@ bool TicFocuser::ISNewSwitch(const char *dev, const char *name, ISState *states,
         if(!strcmp(name, FocusParkingModeSP.name))
         {
 			IUUpdateSwitch(&FocusParkingModeSP, states, names, n);
-            StepModeSP.s = IPS_OK;
+            FocusParkingModeSP.s = IPS_OK;
 			IDSetSwitch(&FocusParkingModeSP, NULL);
 			return true;
 		}
-
-        // Focus Step Mode 
-        if (strcmp(StepModeSP.name, name) == 0)
-        {             
-            IUUpdateSwitch(&StepModeSP, states, names, n);
-            StepModeSP.s = IPS_OK;
-            IDSetSwitch(&StepModeSP, nullptr);
-
-            return true;
-        }
-
     }
     return INDI::Focuser::ISNewSwitch(dev,name,states,names,n);
 }
@@ -158,7 +138,6 @@ bool TicFocuser::saveConfigItems(FILE *fp)
 {
     Focuser::saveConfigItems(fp);
 
-    IUSaveConfigSwitch(fp, &StepModeSP);
 	IUSaveConfigSwitch(fp, &FocusParkingModeSP);
 
     return true;
@@ -288,17 +267,6 @@ IPState TicFocuser::MoveRelFocuser(FocusDirection dir, uint32_t ticks)
     return ret;
 }
 
-uint8_t TicFocuser::ticStepModeConvert(int mode) 
-{
-
-  uint8_t modesMap[] = { TIC_STEP_MODE_MICROSTEP1, TIC_STEP_MODE_MICROSTEP2, TIC_STEP_MODE_MICROSTEP4, TIC_STEP_MODE_MICROSTEP8 };
-
-  if (mode < 0 || mode >= sizeof(modesMap)/sizeof(modesMap[0]))
-    return modesMap[0];
-
-  return modesMap[mode];
-}
-
 IPState TicFocuser::MoveAbsFocuser(uint32_t ticks)
 {
     if (ticks < FocusAbsPosN[0].min || ticks > FocusAbsPosN[0].max)
@@ -319,11 +287,6 @@ IPState TicFocuser::MoveAbsFocuser(uint32_t ticks)
     do {
 
         err = tic_exit_safe_start(handle);
-        if (err) break;
-
-        int step_mode = IUFindOnSwitchIndex(&StepModeSP);
-        uint8_t tic_step_mode = ticStepModeConvert(step_mode);
-        err = tic_set_step_mode(handle, tic_step_mode);
         if (err) break;
 
         err = tic_set_target_position(handle, ticks);
