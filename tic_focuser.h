@@ -1,21 +1,19 @@
 /*******************************************************************************
-  Copyright(c) 2019 Sebastian Baberowski
-  Copyright(c) 2019 Helge Kutzop
-  Copyright(c) 2014 Radek Kaczorek  <rkaczorek AT gmail DOT com>
+TicFocuser
+Copyright (C) 2019 Sebastian Baberowski
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Library General Public
- License version 2 as published by the Free Software Foundation.
- .
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Library General Public License for more details.
- .
- You should have received a copy of the GNU Library General Public License
- along with this library; see the file COPYING.LIB.  If not, write to
- the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- Boston, MA 02110-1301, USA.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
 #ifndef TICFOCUSER_H
@@ -32,14 +30,6 @@ class TicFocuser : public INDI::Focuser
 
         const char *getDefaultName() {  return "TIC Focuser"; }
 
-/*	
-        typedef enum { 
-            FOCUS_FULL_STEP = TIC_STEP_MODE_MICROSTEP1,
-            FOCUS_HALF_STEP = TIC_STEP_MODE_MICROSTEP2,
-            FOCUS_1_4_STEP  = TIC_STEP_MODE_MICROSTEP4,
-            FOCUS_1_8_STEP  = TIC_STEP_MODE_MICROSTEP8,
-        } FocusStepMode;
-*/
         virtual bool initProperties();
         virtual bool updateProperties();        
 
@@ -48,24 +38,26 @@ class TicFocuser : public INDI::Focuser
 
         bool saveConfigItems(FILE *fp);
 
+        bool Disconnect();
+
         IPState MoveFocuser(FocusDirection dir, int speed, uint16_t duration);
         IPState MoveAbsFocuser(uint32_t ticks);
         IPState MoveRelFocuser(FocusDirection dir, uint32_t ticks);
         bool AbortFocuser();
+        bool SyncFocuser(uint32_t ticks);
 
-        // works only if Parking is enabled
-        IPState ParkFocuser();
+        void TimerHit();
 
     private:
+
+        static uint8_t ticStepModeConvert(int mode);
+        bool lastTimerHitError; //< used to not flood user with the same error messge if it repeats
 
         ISwitch StepModeS[4];
         ISwitchVectorProperty StepModeSP;
         
         ISwitch FocusParkingModeS[2];
         ISwitchVectorProperty FocusParkingModeSP;
-
-        ISwitch FocusParkS[1];
-        ISwitchVectorProperty FocusParkSP;
 
 };
 

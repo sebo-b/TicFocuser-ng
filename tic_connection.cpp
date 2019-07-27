@@ -1,19 +1,19 @@
 /*******************************************************************************
-  Copyright(c) 2019 Sebastian Baberowski
- 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Library General Public
- License version 2 as published by the Free Software Foundation.
- .
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Library General Public License for more details.
- .
- You should have received a copy of the GNU Library General Public License
- along with this library; see the file COPYING.LIB.  If not, write to
- the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- Boston, MA 02110-1301, USA.
+TicFocuser
+Copyright (C) 2019 Sebastian Baberowski
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
 #include "tic_connection.h"
@@ -60,7 +60,7 @@ bool TicConnection::Connect()
 
 		const char* devSerial = tic_device_get_serial_number(*d);
 
-		if (!TicSerialNumberT->text || !*TicSerialNumberT->text || !strcmp(TicSerialNumberT->text,devSerial)) {
+		if (requiredSerialNumber.empty() || requiredSerialNumber == devSerial) {
 			
 			e = tic_handle_open(*d,&handle);
 			if (e) {
@@ -69,6 +69,11 @@ bool TicConnection::Connect()
 				tic_error_free(e);
 				handle = NULL;
 			}
+
+			TicSerialNumberTP.s = requiredSerialNumber.empty()? IPS_IDLE: IPS_OK;
+			IUSaveText(TicSerialNumberT, devSerial);
+			IDSetText(&TicSerialNumberTP, nullptr);
+
 			break;
 		}
 	}
@@ -87,15 +92,12 @@ bool TicConnection::Connect()
 
 bool TicConnection::Disconnect() 
 { 
-	// park focuser
-	ISState st = ISS_ON;
-	char name[] = "PARK";
-	char* names[] = { name };
-
-	m_Device->ISNewSwitch( m_Device->getDeviceName(), "FOCUS_PARK", &st, names, 1);
-
 	tic_handle_close(handle);
 	handle = NULL;
+
+	IUSaveText(TicSerialNumberT, requiredSerialNumber.c_str());
+	TicSerialNumberTP.s = requiredSerialNumber.empty()? IPS_IDLE: IPS_OK;
+	IDSetText(&TicSerialNumberTP, nullptr);
 
     return true;
 };
@@ -115,17 +117,26 @@ bool TicConnection::ISNewText(const char *dev, const char *name, char *texts[], 
     if (!strcmp(dev, m_Device->getDeviceName()))
     {
         if (!strcmp(name, TicSerialNumberTP.name)) {
-            IUUpdateText(&TicSerialNumberTP, texts, names, n);
             
-            if (n == 1 && !strlen(texts[0]))
-				TicSerialNumberTP.s = IPS_IDLE;
-			else
-				TicSerialNumberTP.s = IPS_OK;
+			requiredSerialNumber = texts[0];
 
+			if (m_Device->isConnected()) {
+
+				if (requiredSerialNumber.empty()) {
+					TicSerialNumberTP.s = IPS_IDLE;
+				}
+				else {
+					LOG_WARN("Serial number selected. You must reconnect TicFocuser.");
+					TicSerialNumberTP.s = IPS_BUSY;					
+				}
+
+			}
+			else {
+				IUUpdateText(&TicSerialNumberTP, texts, names, n);
+				TicSerialNumberTP.s = requiredSerialNumber.empty()? IPS_IDLE: IPS_OK;
+			}
+            
             IDSetText(&TicSerialNumberTP, nullptr);
-
-            if (m_Device->isConnected())
-            	LOG_INFO("Serial number selected. You must reconnect TicFocuser.");
 
             return true;
         }

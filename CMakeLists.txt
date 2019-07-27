@@ -4,7 +4,7 @@ if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)
 endif(COMMAND cmake_policy)
 
-PROJECT(astromate CXX C)
+PROJECT(TicFocuser CXX)
 include(ExternalProject)
 
 set (VERSION_MAJOR 1)
@@ -22,10 +22,7 @@ string (REPLACE ";" " " LIBTIC_CFLAGS "${LIBTIC_CFLAGS}")
 string (REPLACE ";" " " LIBTIC_LDFLAGS "${LIBTIC_LDFLAGS}")
 
 #set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${LIBTIC_CFLAGS}")
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_CFLAGS} ${LIBTIC_CFLAGS}")
-
-
-#configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h )
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LIBTIC_CFLAGS}")
 
 include_directories( ${CMAKE_CURRENT_BINARY_DIR})
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR})
