@@ -62,7 +62,7 @@ Add `TicFocuser` to INDI profile in KStars and you are good to go.
 
 ![T825](https://raw.githubusercontent.com/sebo-b/TicFocuser/refactor/extras/tic825.jpg)
 
-2. NEMA-17 stepper motor. I'm using an equivalent of [Pololu #2267][https://www.pololu.com/product/2267].
+2. NEMA-17 stepper motor. I'm using an equivalent of [Pololu #2267](https://www.pololu.com/product/2267).
 
 ![NEMA17](https://raw.githubusercontent.com/sebo-b/TicFocuser/refactor/extras/nema17.jpg)
 
@@ -71,7 +71,7 @@ Add `TicFocuser` to INDI profile in KStars and you are good to go.
 
 ![DC](https://raw.githubusercontent.com/sebo-b/TicFocuser/refactor/extras/dc_barrel.jpg)
 
-5. Basic ironing skills.
+5. Basic soldering skills.
 6. A way to connect the stepper motor to your focuser.
 
 ### 3D printed case
