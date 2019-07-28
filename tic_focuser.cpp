@@ -158,7 +158,8 @@ bool TicFocuser::ISNewSwitch(const char *dev, const char *name, ISState *states,
 
 bool TicFocuser::saveConfigItems(FILE *fp)
 {
-    Focuser::saveConfigItems(fp);
+    if (!Focuser::saveConfigItems(fp))
+        return false;
 
 	IUSaveConfigSwitch(fp, &FocusParkingModeSP);
 

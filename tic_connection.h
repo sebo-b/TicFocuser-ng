@@ -42,6 +42,8 @@ class TicConnection: public Connection::Interface {
         std::string name() { return "TicFocuser USB Connection"; };
         std::string label() { return "TicUSB"; };
 
+        bool saveConfigItems(FILE *fp);
+
     private:
 
         tic_handle* handle;

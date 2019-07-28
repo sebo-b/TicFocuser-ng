@@ -112,6 +112,25 @@ void TicConnection::Deactivated()
 	m_Device->deleteProperty(TicSerialNumberTP.name);
 };
 
+bool TicConnection::saveConfigItems(FILE *fp) {
+
+	if (!Connection::Interface::saveConfigItems(fp))
+		return false;
+
+	if (!requiredSerialNumber.empty()) {
+
+		// make sure we are storing requiredSerialNumber as TicSerialNumberT may contain connected TIC serial
+		char* tmpText = TicSerialNumberT[0].text;
+		TicSerialNumberT[0].text = const_cast<char*>(requiredSerialNumber.c_str());
+
+		IUSaveConfigText(fp,&TicSerialNumberTP);
+
+		TicSerialNumberT[0].text = tmpText;
+	}
+
+	return true;
+}
+
 bool TicConnection::ISNewText(const char *dev, const char *name, char *texts[], char *names[], int n)
 {
     if (!strcmp(dev, m_Device->getDeviceName()))
