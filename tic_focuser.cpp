@@ -72,7 +72,7 @@ void ISSnoopDevice (XMLEle *root)
 TicFocuser::TicFocuser():
     lastTimerHitError(false)
 {
-	setVersion(1,0);
+	setVersion(2,0);
     setSupportedConnections(CONNECTION_NONE);
     FI::SetCapability(FOCUSER_CAN_ABS_MOVE | FOCUSER_CAN_REL_MOVE | FOCUSER_CAN_SYNC | FOCUSER_CAN_ABORT );
 }
@@ -89,9 +89,12 @@ bool TicFocuser::initProperties()
 	IUFillSwitch(&FocusParkingModeS[1],"FOCUS_PARKOFF","Disable",ISS_ON);
 	IUFillSwitchVector(&FocusParkingModeSP,FocusParkingModeS,2,getDeviceName(),"FOCUS_PARK_MODE","Parking Mode",OPTIONS_TAB,IP_RW,ISR_1OFMANY,60,IPS_IDLE);
 
+    IUFillSwitch(&EnergizeFocuserS[0],"ENERGIZE_FOCUSER","Energize focuser",ISS_OFF);
+    IUFillSwitch(&EnergizeFocuserS[1],"DEENERGIZE_FOCUSER","De-energize focuser",ISS_OFF);
+    IUFillSwitchVector(&EnergizeFocuserSP,EnergizeFocuserS,2,getDeviceName(),"ENERGIZE_FOCUSER","Energize",MAIN_CONTROL_TAB,IP_RW,ISR_1OFMANY,60,IPS_IDLE);
+
     TicConnection* ticC = new TicConnection(this);
     registerConnection(ticC);
-
 
     return true;
 }
@@ -102,11 +105,13 @@ bool TicFocuser::updateProperties()
 
     if (isConnected())
     {
+        defineSwitch(&EnergizeFocuserSP);
         defineSwitch(&FocusParkingModeSP);
     }
     else
     {
         deleteProperty(FocusParkingModeSP.name);
+        deleteProperty(EnergizeFocuserSP.name);
     }
 
     return true;
@@ -130,6 +135,23 @@ bool TicFocuser::ISNewSwitch(const char *dev, const char *name, ISState *states,
 			IDSetSwitch(&FocusParkingModeSP, NULL);
 			return true;
 		}
+
+        if(!strcmp(name, EnergizeFocuserSP.name))
+        {
+            bool res;
+
+            if (!strcmp(names[0],EnergizeFocuserS[0].name))
+                res = energizeFocuser();
+            else
+                res = deenergizeFocuser();
+
+            EnergizeFocuserSP.s = res? IPS_OK: IPS_ALERT;
+            IDSetSwitch(&EnergizeFocuserSP, NULL);
+
+            return true;
+        }
+
+
     }
     return INDI::Focuser::ISNewSwitch(dev,name,states,names,n);
 }
@@ -154,6 +176,17 @@ bool TicFocuser::Disconnect()
     }
 
     return Focuser::Disconnect();
+}
+
+bool TicFocuser::Connect() 
+{
+    bool res = Focuser::Connect();
+
+    if (res) {
+        energizeFocuser();  // Error will be shown by energizeFocuser() function, no need to show it here
+    }
+
+    return res;
 }
 
 void TicFocuser::TimerHit() 
@@ -201,6 +234,52 @@ void TicFocuser::TimerHit()
     IDSetNumber(&FocusAbsPosNP, nullptr);
 
     SetTimer(POLLMS);
+}
+
+bool TicFocuser::energizeFocuser()
+{
+    TicConnection* conn = static_cast<TicConnection*>(getActiveConnection());    
+    tic_handle* handle = conn->getHandle();
+    
+    tic_error* err = NULL;
+
+    do {
+
+        err = tic_energize(handle);
+        if (err) break;
+
+        err = tic_exit_safe_start(handle);
+        if (err) break;        
+
+    } while (0);
+
+    if (err) {
+        const char* errMsg = tic_error_get_message(err);
+        LOGF_ERROR("Cannot energize motor. Error: %s", errMsg);
+        tic_error_free(err);
+        return false;
+    }
+
+    return true;
+}
+
+bool TicFocuser::deenergizeFocuser()
+{
+    TicConnection* conn = static_cast<TicConnection*>(getActiveConnection());    
+    tic_handle* handle = conn->getHandle();
+    
+    tic_error* err = tic_deenergize(handle);
+
+    if (err) {
+        const char* errMsg = tic_error_get_message(err);
+        LOGF_ERROR("Cannot de-energize motor. Error: %s", errMsg);
+        tic_error_free(err);
+        return false;
+    }
+
+    LOG_INFO("Focuser de-energized. You must energize it to resume normal operation.");
+
+    return true;
 }
 
 bool TicFocuser::SyncFocuser(uint32_t ticks) 
@@ -256,12 +335,10 @@ IPState TicFocuser::MoveRelFocuser(FocusDirection dir, uint32_t ticks)
 
     IPState ret =  MoveAbsFocuser(absTicks);
 
-    if (ret == IPS_OK) {
-        FocusAbsPosN[0].value = absTicks;
-        FocusAbsPosNP.s = IPS_OK;
-        IDSetNumber(&FocusAbsPosNP, nullptr);
-
-        LOGF_INFO("TicFocuser moving to position %d", absTicks);
+    if (ret != IPS_ALERT) {
+        FocusAbsPosNP.s = ret;
+        IDSetNumber(&FocusRelPosNP, nullptr);
+        return IPS_OK;
     }
 
     return ret;
@@ -282,26 +359,15 @@ IPState TicFocuser::MoveAbsFocuser(uint32_t ticks)
 
     TicConnection* conn = static_cast<TicConnection*>(getActiveConnection());    
     tic_handle* handle = conn->getHandle();
-    tic_error* err = NULL;
 
-    do {
-
-        err = tic_exit_safe_start(handle);
-        if (err) break;
-
-        err = tic_set_target_position(handle, ticks);
-        if (err) break; 
-
-    }
-    while (0);
+    tic_error* err = tic_set_target_position(handle, ticks);
 
     if (err) {
         const char* errMsg = tic_error_get_message(err);
         LOGF_ERROR("Cannot abort TIC. Error: %s", errMsg);
         tic_error_free(err);
-        return IPS_OK; //TODO debug
         return IPS_ALERT;
     }
   
-    return IPS_OK;
+    return IPS_BUSY;
 }

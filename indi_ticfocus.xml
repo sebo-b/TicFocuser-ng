@@ -2,8 +2,8 @@
 <driversList>
 <devGroup group="Focusers">
 	<device label="TIC Focuser">
-		<driver name="TicFocuser">indi_ticfocus</driver>
-                <version>1.0</version>
+		<driver name="TicFocuser">indi_ticfocuser</driver>
+                <version>2.0</version>
 	</device>
 </devGroup>
 </driversList>

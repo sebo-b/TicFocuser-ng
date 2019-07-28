@@ -39,6 +39,7 @@ class TicFocuser : public INDI::Focuser
         bool saveConfigItems(FILE *fp);
 
         bool Disconnect();
+        bool Connect();
 
         IPState MoveFocuser(FocusDirection dir, int speed, uint16_t duration);
         IPState MoveAbsFocuser(uint32_t ticks);
@@ -48,12 +49,18 @@ class TicFocuser : public INDI::Focuser
 
         void TimerHit();
 
+        bool energizeFocuser();
+        bool deenergizeFocuser();
+
     private:
 
         bool lastTimerHitError; //< used to not flood user with the same error messge if it repeats
         
         ISwitch FocusParkingModeS[2];
         ISwitchVectorProperty FocusParkingModeSP;
+
+        ISwitch EnergizeFocuserS[2];
+        ISwitchVectorProperty EnergizeFocuserSP;
 
 };
 
