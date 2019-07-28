@@ -38,7 +38,7 @@ To automatically create Arch package you can use AUR package created by myself a
 
 ### Configure Pololu Tic
 
-If you haven't do so, execute `ticgui` and properly configure Tic controller. For various reasons motor parameters are not controlled by TicFocuser driver.
+If you haven't did so, execute `ticgui` and properly configure Tic controller. For various reasons motor parameters are not controlled by TicFocuser driver.
 
 At minimum:
 * Configure your motor parameters like: current limit, step mode, speed, acceleration, etc.
