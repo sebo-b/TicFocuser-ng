@@ -70,7 +70,7 @@ void ISSnoopDevice (XMLEle *root)
 }
 
 TicFocuser::TicFocuser():
-    lastTimerHitError(false)
+    lastTimerHitError(false), moveRelInitialValue(-1)
 {
 	setVersion(2,0);
     setSupportedConnections(CONNECTION_NONE);
@@ -212,6 +212,18 @@ void TicFocuser::TimerHit()
         uint8_t planningMode = tic_variables_get_planning_mode(variables);
         FocusAbsPosNP.s = planningMode == TIC_PLANNING_MODE_OFF? IPS_OK: IPS_BUSY;
 
+        if (FocusRelPosNP.s == IPS_BUSY) {
+
+            if (moveRelInitialValue >= 0) {
+                FocusRelPosN[0].value = abs( moveRelInitialValue - currentPos);
+            }
+
+            if (planningMode == TIC_PLANNING_MODE_OFF) {
+                FocusRelPosNP.s = IPS_OK;
+                moveRelInitialValue = -1;
+            }
+
+        }
         //int32_t targetPos = tic_variables_get_target_position(variables);
 
     } while (0);
@@ -233,6 +245,7 @@ void TicFocuser::TimerHit()
     tic_variables_free(variables);
 
     IDSetNumber(&FocusAbsPosNP, nullptr);
+    IDSetNumber(&FocusRelPosNP, nullptr);
 
     SetTimer(POLLMS);
 }
@@ -329,18 +342,18 @@ IPState TicFocuser::MoveFocuser(FocusDirection dir, int speed, uint16_t duration
 IPState TicFocuser::MoveRelFocuser(FocusDirection dir, uint32_t ticks)
 {
     int32_t absTicks = FocusAbsPosN[0].value;
+    int32_t targetTicks;
     if (dir == FOCUS_OUTWARD)
-        absTicks += ticks;
+        targetTicks = absTicks + ticks;
     else
-        absTicks -= ticks;
+        targetTicks = absTicks - ticks;
 
-    IPState ret =  MoveAbsFocuser(absTicks);
+    IPState ret =  MoveAbsFocuser(targetTicks);
 
-    if (ret != IPS_ALERT) {
-        FocusAbsPosNP.s = ret;
-        IDSetNumber(&FocusRelPosNP, nullptr);
-        return IPS_OK;
-    }
+    moveRelInitialValue = ret == IPS_BUSY? absTicks: -1;
+
+    FocusAbsPosNP.s = ret;
+    IDSetNumber(&FocusAbsPosNP, nullptr);
 
     return ret;
 }

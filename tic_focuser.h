@@ -55,7 +55,8 @@ class TicFocuser : public INDI::Focuser
     private:
 
         bool lastTimerHitError; //< used to not flood user with the same error messge if it repeats
-        
+        int32_t moveRelInitialValue;    //< used to simulate MoveRelFocuser
+
         ISwitch FocusParkingModeS[2];
         ISwitchVectorProperty FocusParkingModeSP;
 
