@@ -43,7 +43,7 @@ If you haven't did so, execute `ticgui` and properly configure Tic controller. F
 At minimum:
 * Configure your motor parameters like: current limit, step mode, speed, acceleration, etc.
 
-![ticcmd](https://raw.githubusercontent.com/sebo-b/TicFocuser/refactor/extras/ticgui_motorsettings.png)
+![ticcmd](https://raw.githubusercontent.com/sebo-b/TicFocuser_v2/master/extras/ticgui_motorsettings.png)
 
 * Uncheck `Enable command timeout` checkbox in the `Serial` box. More info abt it in [chapter 4.4 of Pololu Tic documentation](https://www.pololu.com/docs/0J71/all#4.4). 
 
@@ -60,16 +60,16 @@ Add `TicFocuser` to INDI profile in KStars and you are good to go.
 ### What will you need
 1. Tic Motor controller (without gold pins). I used T825 which looks like that:
 
-![T825](https://raw.githubusercontent.com/sebo-b/TicFocuser/refactor/extras/tic825.jpg)
+![T825](https://raw.githubusercontent.com/sebo-b/TicFocuser_v2/master/extras/tic825.jpg)
 
 2. NEMA-17 stepper motor. I'm using an equivalent of [Pololu #2267](https://www.pololu.com/product/2267).
 
-![NEMA17](https://raw.githubusercontent.com/sebo-b/TicFocuser/refactor/extras/nema17.jpg)
+![NEMA17](https://raw.githubusercontent.com/sebo-b/TicFocuser_v2/master/extras/nema17.jpg)
 
 3. Possibility to 3D print the case.
 4. DC Barrel Power Jack Socket 5.5mm/2.1mm.
 
-![DC](https://raw.githubusercontent.com/sebo-b/TicFocuser/refactor/extras/dc_barrel.jpg)
+![DC](https://raw.githubusercontent.com/sebo-b/TicFocuser_v2/master/extras/dc_barrel.jpg)
 
 5. Basic soldering skills.
 6. A way to connect the stepper motor to your focuser.
@@ -78,17 +78,17 @@ Add `TicFocuser` to INDI profile in KStars and you are good to go.
 
 Model of controller case looks like the following:
 
-![Case](https://raw.githubusercontent.com/sebo-b/TicFocuser/refactor/extras/case1.jpg)
+![Case](https://raw.githubusercontent.com/sebo-b/TicFocuser_v2/master/extras/case1.jpg)
 
 Case after printout mounted on the motor:
 
-![Case](https://raw.githubusercontent.com/sebo-b/TicFocuser/refactor/extras/case2.jpg)
+![Case](https://raw.githubusercontent.com/sebo-b/TicFocuser_v2/master/extras/case2.jpg)
 
 With all elements inside:
 
-![Case](https://raw.githubusercontent.com/sebo-b/TicFocuser/refactor/extras/case3.jpg)
+![Case](https://raw.githubusercontent.com/sebo-b/TicFocuser_v2/master/extras/case3.jpg)
 
-A project of the case is [attached as STL file](https://raw.githubusercontent.com/sebo-b/TicFocuser/refactor/extras/ticfocuser_case.stl) for 3D printer. Please just note that this file is in 10:1 scale, so it needs to be 10x rescaled down before printing. 
+A project of the case is [attached as STL file](https://raw.githubusercontent.com/sebo-b/TicFocuser_v2/master/extras/ticfocuser_case.stl) for 3D printer. Please just note that this file is in 10:1 scale, so it needs to be 10x rescaled down before printing. 
 
 Enjoy!
 
