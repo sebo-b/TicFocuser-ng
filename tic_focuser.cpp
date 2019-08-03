@@ -42,7 +42,7 @@ void ISNewSwitch(const char *dev, const char *name, ISState *states, char *names
     ticFocuser->ISNewSwitch(dev, name, states, names, num);
 }
 
-void ISNewText(	const char *dev, const char *name, char *texts[], char *names[], int num)
+void ISNewText(    const char *dev, const char *name, char *texts[], char *names[], int num)
 {
     ticFocuser->ISNewText(dev, name, texts, names, num);
 }
@@ -72,7 +72,7 @@ void ISSnoopDevice (XMLEle *root)
 TicFocuser::TicFocuser():
     lastTimerHitError(false), moveRelInitialValue(-1)
 {
-	setVersion(2,0);
+    setVersion(0,9);
     setSupportedConnections(CONNECTION_NONE);
     FI::SetCapability(FOCUSER_CAN_ABS_MOVE | FOCUSER_CAN_REL_MOVE | FOCUSER_CAN_SYNC | FOCUSER_CAN_ABORT );
 }
@@ -85,9 +85,9 @@ bool TicFocuser::initProperties()
 {
     INDI::Focuser::initProperties();
 
-	IUFillSwitch(&FocusParkingModeS[0],"FOCUS_PARKON","Enable",ISS_OFF);
-	IUFillSwitch(&FocusParkingModeS[1],"FOCUS_PARKOFF","Disable",ISS_ON);
-	IUFillSwitchVector(&FocusParkingModeSP,FocusParkingModeS,2,getDeviceName(),"FOCUS_PARK_MODE","Parking Mode",OPTIONS_TAB,IP_RW,ISR_1OFMANY,60,IPS_IDLE);
+    IUFillSwitch(&FocusParkingModeS[0],"FOCUS_PARKON","Enable",ISS_OFF);
+    IUFillSwitch(&FocusParkingModeS[1],"FOCUS_PARKOFF","Disable",ISS_ON);
+    IUFillSwitchVector(&FocusParkingModeSP,FocusParkingModeS,2,getDeviceName(),"FOCUS_PARK_MODE","Parking Mode",OPTIONS_TAB,IP_RW,ISR_1OFMANY,60,IPS_IDLE);
 
     IUFillSwitch(&EnergizeFocuserS[0],"ENERGIZE_FOCUSER","Energize focuser",ISS_OFF);
     IUFillSwitch(&EnergizeFocuserS[1],"DEENERGIZE_FOCUSER","De-energize focuser",ISS_OFF);
@@ -126,15 +126,15 @@ bool TicFocuser::ISNewSwitch(const char *dev, const char *name, ISState *states,
 {
     // first we check if it's for our device
     if (!strcmp(dev, getDeviceName()))
-    {	
+    {    
         // handle parking mode
         if(!strcmp(name, FocusParkingModeSP.name))
         {
-			IUUpdateSwitch(&FocusParkingModeSP, states, names, n);
+            IUUpdateSwitch(&FocusParkingModeSP, states, names, n);
             FocusParkingModeSP.s = IPS_OK;
-			IDSetSwitch(&FocusParkingModeSP, NULL);
-			return true;
-		}
+            IDSetSwitch(&FocusParkingModeSP, NULL);
+            return true;
+        }
 
         if(!strcmp(name, EnergizeFocuserSP.name))
         {
@@ -161,7 +161,7 @@ bool TicFocuser::saveConfigItems(FILE *fp)
     if (!Focuser::saveConfigItems(fp))
         return false;
 
-	IUSaveConfigSwitch(fp, &FocusParkingModeSP);
+    IUSaveConfigSwitch(fp, &FocusParkingModeSP);
 
     return true;
 }
@@ -365,7 +365,7 @@ IPState TicFocuser::MoveAbsFocuser(uint32_t ticks)
         LOG_ERROR("Requested position is out of range.");
         return IPS_ALERT;
     }
-    	
+        
     if (ticks == FocusAbsPosN[0].value)
     {
         return IPS_OK;
