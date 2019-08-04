@@ -93,7 +93,10 @@ bool TicConnection::Connect()
     tic_list_free(deviceList);
 
     if (!handle) {
-        LOG_ERROR("No TIC device found.");
+        if (requiredSerialNumber.empty())
+            LOG_ERROR("No TIC device found.");
+        else 
+            LOGF_ERROR("No TIC device found with serial: %s. You can set serial to empty to connect to the first found Tic device.", requiredSerialNumber.c_str());
         return false;
     }
 
