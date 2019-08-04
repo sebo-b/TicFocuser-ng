@@ -30,6 +30,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "tic_focuser.h"
 #include "tic_connection.h"
 
+#include "tic_focuser_config.h"
+
 std::unique_ptr<TicFocuser> ticFocuser(new TicFocuser());
 
 void ISGetProperties(const char *dev)
@@ -72,7 +74,7 @@ void ISSnoopDevice (XMLEle *root)
 TicFocuser::TicFocuser():
     lastTimerHitError(false), moveRelInitialValue(-1)
 {
-    setVersion(0,9);
+    setVersion(TICFOCUSER_VERSION_MAJOR,TICFOCUSER_VERSION_MINOR);
     setSupportedConnections(CONNECTION_NONE);
     FI::SetCapability(FOCUSER_CAN_ABS_MOVE | FOCUSER_CAN_REL_MOVE | FOCUSER_CAN_SYNC | FOCUSER_CAN_ABORT );
 }

@@ -28,7 +28,7 @@ class TicFocuser : public INDI::Focuser
         TicFocuser();
         virtual ~TicFocuser();
 
-        const char *getDefaultName() {  return "TIC Focuser"; }
+        const char *getDefaultName() {  return "TIC Focuser NG"; }
 
         virtual bool initProperties();
         virtual bool updateProperties();        
