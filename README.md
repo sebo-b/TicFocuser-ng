@@ -88,6 +88,10 @@ With all elements inside:
 
 ![Case](https://raw.githubusercontent.com/sebo-b/TicFocuser-ng/master/extras/case3.jpg)
 
+And fully assembled and mounted on the tube:
+
+![Case](https://raw.githubusercontent.com/sebo-b/TicFocuser-ng/master/extras/focuser_final.jpg)
+
 A project of the case is [attached as STL file](https://raw.githubusercontent.com/sebo-b/TicFocuser-ng/master/extras/ticfocuser_case.stl) for 3D printer. Please just note that this file is in 10:1 scale, so it needs to be 10x rescaled down before printing. 
 
 Enjoy!
