@@ -1,4 +1,4 @@
-# TicFocuser NG
+# TicFocuser-ng
 INDI Driver for USB focuser based on Pololu Tic controller.
 
 This project was initially a fork of TicFocuser driver written by Helge Kutzop and published on [GitHub](https://github.com/HelgeMK/TicFocuser) as it seemed that the author is not maintaining it anymore. However, the refactor of code was such deep, that I'm not sure if a single line of the original code stayed in this version. Helge was basing his version on Radek Kaczorek's "astroberry-diy" drivers published on [GitHub](https://github.com/rkaczorek/astroberry-diy). As said I'm quite certain that all old code was rewritten, nevertheless to respect both authors I kept their names in AUTHORS file.
