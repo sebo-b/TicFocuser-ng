@@ -30,8 +30,12 @@ TicConnection::TicConnection(INDI::DefaultDevice *dev):
     const size_t MAX_SERIAL_NUMBER = 20; // serial number has 8 characters, 20 is super safe
     char serialNumber[MAX_SERIAL_NUMBER];    
 
-    if (IUGetConfigText(dev->getDeviceName(), "TIC_SERIAL_TP", "TIC_SERIAL_NUMBER", serialNumber, MAX_SERIAL_NUMBER))
+    if (IUGetConfigText(dev->getDeviceName(), "TIC_SERIAL_TP", "TIC_SERIAL_NUMBER", serialNumber, MAX_SERIAL_NUMBER)) {
         serialNumber[0] = '\0';
+    }
+    else {
+    	requiredSerialNumber = serialNumber;
+    }
 
     IUFillText(TicSerialNumberT, "TIC_SERIAL_NUMBER", "Tic Serial Number", serialNumber);
     IUFillTextVector(&TicSerialNumberTP, TicSerialNumberT, 1, getDeviceName(), "TIC_SERIAL_TP", "Tic Serial Number", CONNECTION_TAB,
@@ -90,7 +94,7 @@ bool TicConnection::Connect()
 
     if (!handle) {
         LOG_ERROR("No TIC device found.");
-        return true; // TODO: debug only
+        return false;
     }
 
     return true;

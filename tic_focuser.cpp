@@ -208,23 +208,25 @@ void TicFocuser::TimerHit()
 
         int32_t currentPos = tic_variables_get_current_position(variables);
         FocusAbsPosN[0].value = currentPos;
+        FocusSyncN[0].value = currentPos;
 
-        uint8_t planningMode = tic_variables_get_planning_mode(variables);
-        FocusAbsPosNP.s = planningMode == TIC_PLANNING_MODE_OFF? IPS_OK: IPS_BUSY;
+//        uint8_t planningMode = tic_variables_get_planning_mode(variables);
+//        FocusAbsPosNP.s = planningMode == TIC_PLANNING_MODE_OFF? IPS_OK: IPS_BUSY;
 
-        if (FocusRelPosNP.s == IPS_BUSY) {
+        if (FocusAbsPosNP.s == IPS_BUSY) {
 
             if (moveRelInitialValue >= 0) {
                 FocusRelPosN[0].value = abs( moveRelInitialValue - currentPos);
             }
 
-            if (planningMode == TIC_PLANNING_MODE_OFF) {
+            int32_t targetPos = tic_variables_get_target_position(variables);
+
+            if (currentPos == targetPos) {
+                FocusAbsPosNP.s = IPS_OK;
                 FocusRelPosNP.s = IPS_OK;
                 moveRelInitialValue = -1;
             }
-
         }
-        //int32_t targetPos = tic_variables_get_target_position(variables);
 
     } while (0);
 
@@ -246,6 +248,7 @@ void TicFocuser::TimerHit()
 
     IDSetNumber(&FocusAbsPosNP, nullptr);
     IDSetNumber(&FocusRelPosNP, nullptr);
+    IDSetNumber(&FocusSyncNP, nullptr);
 
     SetTimer(POLLMS);
 }
