@@ -27,10 +27,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "tic.h"
 
-#include "tic_focuser.h"
+#include "TicFocuser.h"
 #include "connection/PololuUsbConnection.h"
 
-#include "tic_focuser_config.h"
+#include "TicFocuser_config.h"
 
 std::unique_ptr<TicFocuser> ticFocuser(new TicFocuser());
 

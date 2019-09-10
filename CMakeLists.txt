@@ -10,7 +10,7 @@ PROJECT(TicFocuserNG CXX)
 set (TICFOCUSER_VERSION_MAJOR 0)
 set (TICFOCUSER_VERSION_MINOR 9)
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tic_focuser_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/tic_focuser_config.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/TicFocuser_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/TicFocuser_config.h)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/indi_ticfocuser-ng.xml.in ${CMAKE_CURRENT_BINARY_DIR}/indi_ticfocuser-ng.xml)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/")
@@ -44,7 +44,7 @@ include_directories(
 	${LIBUSB_1_INCLUDE_DIRS} )
 
 set(indi_ticfocuser-ng_SRCS
-        ${CMAKE_CURRENT_SOURCE_DIR}/tic_focuser.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/TicFocuser.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tic/TicBase.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tic/TicUsb.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/connection/PololuUsbConnection.cpp
