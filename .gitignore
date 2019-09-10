@@ -1,2 +1,4 @@
 .vscode
 [Bb]uild
+._*
+.DS_Store

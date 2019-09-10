@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef TICUSB_H
 #define TICUSB_H
 
-#include "Tic.h"
+#include "TicBase.h"
 
 struct libusb_device_handle;
 struct libusb_context;

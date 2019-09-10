@@ -1,6 +1,6 @@
 // Copyright (C) Pololu Corporation.  See LICENSE.txt for details.
 
-#include "Tic.h"
+#include "TicBase.h"
 #include <string.h>
 
 
