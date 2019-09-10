@@ -28,7 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "tic.h"
 
 #include "tic_focuser.h"
-#include "tic_connection.h"
+#include "connection/tic_connection.h"
 
 #include "tic_focuser_config.h"
 
