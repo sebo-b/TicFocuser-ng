@@ -20,15 +20,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define TICCONNECTION_H
 
 #include <connectionplugins/connectioninterface.h>
+#include "TicConnectionInterface.h"
 
 struct tic_handle;
+class PololuUsbConnectionMediator;
 
-class TicConnection: public Connection::Interface {
-    
+class PololuUsbConnection: 
+    public Connection::Interface,
+    public TicConnectionInterface
+{
     public:
 
-        TicConnection(INDI::DefaultDevice *dev);
-        ~TicConnection();
+        PololuUsbConnection(INDI::DefaultDevice *dev);
+        ~PololuUsbConnection();
         
         bool Connect();
         bool Disconnect();
@@ -37,21 +41,21 @@ class TicConnection: public Connection::Interface {
 
         bool ISNewText(const char *dev, const char *name, char *texts[], char *names[], int n);
 
-        tic_handle* getHandle() { return handle; }
-
-        std::string name() { return "TicFocuser USB Connection"; };
-        std::string label() { return "TicUSB"; };
+        std::string name() { return "Pololu USB Connection"; };
+        std::string label() { return "Pololu USB"; };
 
         bool saveConfigItems(FILE *fp);
 
+        TicMediator& getTicMediator();
+        
     private:
-
-        tic_handle* handle;
 
         IText TicSerialNumberT[1] {};
         ITextVectorProperty TicSerialNumberTP;
 
         std::string requiredSerialNumber;
+
+        PololuUsbConnectionMediator* mediator;
 };
 
 #endif // TICCONNECTION_H

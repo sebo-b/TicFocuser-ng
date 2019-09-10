@@ -72,7 +72,8 @@ void ISSnoopDevice (XMLEle *root)
 }
 
 TicFocuser::TicFocuser():
-    lastTimerHitError(false), moveRelInitialValue(-1)
+    moveRelInitialValue(-1),
+    lastTimerHitError(false)
 {
     setVersion(TICFOCUSER_VERSION_MAJOR,TICFOCUSER_VERSION_MINOR);
     setSupportedConnections(CONNECTION_NONE);
@@ -95,8 +96,8 @@ bool TicFocuser::initProperties()
     IUFillSwitch(&EnergizeFocuserS[1],"DEENERGIZE_FOCUSER","De-energize focuser",ISS_OFF);
     IUFillSwitchVector(&EnergizeFocuserSP,EnergizeFocuserS,2,getDeviceName(),"ENERGIZE_FOCUSER","Energize",MAIN_CONTROL_TAB,IP_RW,ISR_1OFMANY,60,IPS_IDLE);
 
-    TicConnection* ticC = new TicConnection(this);
-    registerConnection(ticC);
+    PololuUsbConnection* pololuUsbC = new PololuUsbConnection(this);
+    registerConnection(pololuUsbC);
 
     return true;
 }
@@ -197,85 +198,59 @@ void TicFocuser::TimerHit()
     if (!isConnected())
         return;
 
-    TicConnection* conn = static_cast<TicConnection*>(getActiveConnection());    
-    tic_handle* handle = conn->getHandle();
+    TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
+    TicMediator& mediator = conn->getTicMediator();
 
-    tic_error* err = NULL;
-    tic_variables* variables = NULL;
+    TicMediator::TicVariables ticVariables;
+    bool res = mediator.getVariables(&ticVariables);
 
-    do {
+    if (res) {
+        lastTimerHitError = false;
 
-        err = tic_get_variables(handle,&variables,false);
-        if (err) break;
-
-        int32_t currentPos = tic_variables_get_current_position(variables);
-        FocusAbsPosN[0].value = currentPos;
-        FocusSyncN[0].value = currentPos;
-
-//        uint8_t planningMode = tic_variables_get_planning_mode(variables);
-//        FocusAbsPosNP.s = planningMode == TIC_PLANNING_MODE_OFF? IPS_OK: IPS_BUSY;
+        FocusAbsPosN[0].value = ticVariables.currentPosition;
+        FocusSyncN[0].value = ticVariables.currentPosition;
 
         if (FocusAbsPosNP.s == IPS_BUSY) {
 
             if (moveRelInitialValue >= 0) {
-                FocusRelPosN[0].value = abs( moveRelInitialValue - currentPos);
+                FocusRelPosN[0].value = abs( moveRelInitialValue - ticVariables.currentPosition);
             }
 
-            int32_t targetPos = tic_variables_get_target_position(variables);
-
-            if (currentPos == targetPos) {
+            if ( ticVariables.currentPosition ==  ticVariables.targetPosition) {
                 FocusAbsPosNP.s = IPS_OK;
                 FocusRelPosNP.s = IPS_OK;
                 moveRelInitialValue = -1;
             }
         }
 
-    } while (0);
+        IDSetNumber(&FocusAbsPosNP, nullptr);
+        IDSetNumber(&FocusRelPosNP, nullptr);
+        IDSetNumber(&FocusSyncNP, nullptr);
 
-    if (err) {
-
-        if (!lastTimerHitError) {
-            const char* errMsg = tic_error_get_message(err);
-            LOGF_ERROR("TIC error: %s", errMsg);
-        }
-
-        tic_error_free(err);
+    }
+    else if (!lastTimerHitError) {
+        LOGF_ERROR("Cannot receive variables: %s", mediator.getLastErrorMsg());
         lastTimerHitError = true;
     }
-    else {
-        lastTimerHitError = false;
-    }
-
-    tic_variables_free(variables);
-
-    IDSetNumber(&FocusAbsPosNP, nullptr);
-    IDSetNumber(&FocusRelPosNP, nullptr);
-    IDSetNumber(&FocusSyncNP, nullptr);
 
     SetTimer(POLLMS);
 }
 
 bool TicFocuser::energizeFocuser()
 {
-    TicConnection* conn = static_cast<TicConnection*>(getActiveConnection());    
-    tic_handle* handle = conn->getHandle();
-    
-    tic_error* err = NULL;
+    TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
+    TicMediator& mediator = conn->getTicMediator();
 
-    do {
+    if (!mediator.energize()) 
+    {
+        LOGF_ERROR("Cannot energize motor. Error: %s", mediator.getLastErrorMsg());
+        return false;
+    }
 
-        err = tic_energize(handle);
-        if (err) break;
 
-        err = tic_exit_safe_start(handle);
-        if (err) break;        
-
-    } while (0);
-
-    if (err) {
-        const char* errMsg = tic_error_get_message(err);
-        LOGF_ERROR("Cannot energize motor. Error: %s", errMsg);
-        tic_error_free(err);
+    if (!mediator.exitSafeStart())
+    {
+        LOGF_ERROR("Cannot exit safe start. Error: %s", mediator.getLastErrorMsg());
         return false;
     }
 
@@ -284,33 +259,30 @@ bool TicFocuser::energizeFocuser()
 
 bool TicFocuser::deenergizeFocuser()
 {
-    TicConnection* conn = static_cast<TicConnection*>(getActiveConnection());    
-    tic_handle* handle = conn->getHandle();
-    
-    tic_error* err = tic_deenergize(handle);
+    TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
+    TicMediator& mediator = conn->getTicMediator();
 
-    if (err) {
-        const char* errMsg = tic_error_get_message(err);
-        LOGF_ERROR("Cannot de-energize motor. Error: %s", errMsg);
-        tic_error_free(err);
+    if (!mediator.deenergize())
+    {
+        LOGF_ERROR("Cannot de-energize motor. Error: %s", mediator.getLastErrorMsg());
         return false;
     }
-
-    LOG_INFO("Focuser de-energized. You must energize it to resume normal operation.");
+    else
+    {
+        LOG_INFO("Focuser de-energized. You must energize it to resume normal operation.");
+    }
 
     return true;
 }
 
 bool TicFocuser::SyncFocuser(uint32_t ticks) 
 {
-    TicConnection* conn = static_cast<TicConnection*>(getActiveConnection());    
-    tic_handle* handle = conn->getHandle();
-    
-    tic_error* err = tic_halt_and_set_position(handle, ticks);
-    if (err) {
-        const char* errMsg = tic_error_get_message(err);
-        LOGF_ERROR("Cannot abort TIC. Error: %s", errMsg);
-        tic_error_free(err);
+    TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
+    TicMediator& mediator = conn->getTicMediator();
+
+    if (!mediator.haltAndSetPosition(ticks))
+    {
+        LOGF_ERROR("Cannot sync focuser. Error: %s", mediator.getLastErrorMsg());
         return false;
     }
 
@@ -318,16 +290,15 @@ bool TicFocuser::SyncFocuser(uint32_t ticks)
 }
 
 
-bool TicFocuser::AbortFocuser() {
+bool TicFocuser::AbortFocuser() 
+{
 
-    TicConnection* conn = static_cast<TicConnection*>(getActiveConnection());    
-    tic_handle* handle = conn->getHandle();
-    
-    tic_error* err = tic_halt_and_hold(handle);
-    if (err) {
-        const char* errMsg = tic_error_get_message(err);
-        LOGF_ERROR("Cannot abort TIC. Error: %s", errMsg);
-        tic_error_free(err);
+    TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
+    TicMediator& mediator = conn->getTicMediator();
+
+    if (!mediator.haltAndHold())
+    {
+        LOGF_ERROR("Cannot abort TIC. Error: %s", mediator.getLastErrorMsg());
         return false;
     }
 
@@ -376,15 +347,12 @@ IPState TicFocuser::MoveAbsFocuser(uint32_t ticks)
         return IPS_OK;
     }
 
-    TicConnection* conn = static_cast<TicConnection*>(getActiveConnection());    
-    tic_handle* handle = conn->getHandle();
+    TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
+    TicMediator& mediator = conn->getTicMediator();
 
-    tic_error* err = tic_set_target_position(handle, ticks);
-
-    if (err) {
-        const char* errMsg = tic_error_get_message(err);
-        LOGF_ERROR("Cannot abort TIC. Error: %s", errMsg);
-        tic_error_free(err);
+    if (!mediator.setTargetPosition(ticks))
+    {
+        LOGF_ERROR("Cannot set target position. Error: %s", mediator.getLastErrorMsg());
         return IPS_ALERT;
     }
   

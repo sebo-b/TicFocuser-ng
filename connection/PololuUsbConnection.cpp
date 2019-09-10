@@ -18,15 +18,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "PololuUsbConnection.h"
 
+#include "mediators/PololuUsbConnectionMediator.h"
 #include <string.h>
 
 #include <indilogger.h>
 #include <tic.h>
 
-
-TicConnection::TicConnection(INDI::DefaultDevice *dev):
-    Interface(dev, CONNECTION_USB), handle(NULL)
+PololuUsbConnection::PololuUsbConnection(INDI::DefaultDevice *dev):
+    Interface(dev, CONNECTION_USB)
 {
+    mediator = new PololuUsbConnectionMediator();
+
     const size_t MAX_SERIAL_NUMBER = 20; // serial number has 8 characters, 20 is super safe
     char serialNumber[MAX_SERIAL_NUMBER];    
 
@@ -42,90 +44,65 @@ TicConnection::TicConnection(INDI::DefaultDevice *dev):
                      IP_RW, 60, IPS_IDLE);
 };
 
-TicConnection::~TicConnection() 
+PololuUsbConnection::~PololuUsbConnection() 
 {
-    tic_handle_close(handle);
+    delete mediator;
 };
 
-bool TicConnection::Connect() 
+bool PololuUsbConnection::Connect() 
 { 
-    tic_device** deviceList;
-    tic_error *e = NULL;
+    if (!mediator->connect( requiredSerialNumber.c_str() )) 
+    {
+        const char* errorMsg = mediator->getLastErrorMsg();
 
-    if (handle) {
-        LOG_ERROR("Not NULL handle in TicConnection::Connect. Something is very wrong.");
-        return false;    
-    }
-
-    e = tic_list_connected_devices(&deviceList,NULL);
-
-    if (e) {
-        const char* errMsg = tic_error_get_message(e);
-        LOGF_ERROR("Cannot get list of connected TIC devices. Error: %s", errMsg);
-        tic_error_free(e);
-        return false;
-    }
-
-    for (tic_device** d = deviceList; *d; ++d) {
-
-        const char* devSerial = tic_device_get_serial_number(*d);
-
-        if (requiredSerialNumber.empty() || requiredSerialNumber == devSerial) {
-            
-            e = tic_handle_open(*d,&handle);
-            if (e) {
-                const char* errMsg = tic_error_get_message(e);
-                LOGF_ERROR("Cannot open handle to TIC device with serial: %s. Error: %s", devSerial, errMsg);
-                tic_error_free(e);
-                handle = NULL;
-            }
-
-            TicSerialNumberTP.s = requiredSerialNumber.empty()? IPS_IDLE: IPS_OK;
-            IUSaveText(TicSerialNumberT, devSerial);
-            IDSetText(&TicSerialNumberTP, nullptr);
-
-            break;
+        if (errorMsg) 
+        {
+            LOGF_ERROR("Tic error: %s",errorMsg);
         }
-    }
+        else
+        {
+            if (requiredSerialNumber.empty())
+                LOG_ERROR("No TIC device found.");
+            else
+                LOGF_ERROR("No TIC device found with serial: %s. You can set serial to empty to connect to the first found Tic device.", requiredSerialNumber.c_str());
+        }
 
-    for (tic_device** d = deviceList; *d; ++d)
-        tic_device_free(*d);
-    tic_list_free(deviceList);
-
-    if (!handle) {
-        if (requiredSerialNumber.empty())
-            LOG_ERROR("No TIC device found.");
-        else 
-            LOGF_ERROR("No TIC device found with serial: %s. You can set serial to empty to connect to the first found Tic device.", requiredSerialNumber.c_str());
         return false;
     }
 
-    return true;
-};
+    LOGF_INFO("Connected to Tic with serial: %s",mediator->getSerialNumber());
 
-bool TicConnection::Disconnect() 
-{ 
-    tic_handle_close(handle);
-    handle = NULL;
-
-    IUSaveText(TicSerialNumberT, requiredSerialNumber.c_str());
     TicSerialNumberTP.s = requiredSerialNumber.empty()? IPS_IDLE: IPS_OK;
+    IUSaveText(TicSerialNumberT, mediator->getSerialNumber());
     IDSetText(&TicSerialNumberTP, nullptr);
 
     return true;
 };
 
-void TicConnection::Activated() 
+bool PololuUsbConnection::Disconnect() 
+{ 
+    bool err = mediator->disconnect();
+    if (err)
+        LOGF_ERROR("Disconnecting error: %s.", mediator->getLastErrorMsg());
+
+    IUSaveText(TicSerialNumberT, requiredSerialNumber.c_str());
+    TicSerialNumberTP.s = requiredSerialNumber.empty()? IPS_IDLE: IPS_OK;
+    IDSetText(&TicSerialNumberTP, nullptr);
+
+    return err;
+};
+
+void PololuUsbConnection::Activated() 
 {
     m_Device->defineText(&TicSerialNumberTP);
 };
 
-void TicConnection::Deactivated() 
+void PololuUsbConnection::Deactivated() 
 {
     m_Device->deleteProperty(TicSerialNumberTP.name);
 };
 
-bool TicConnection::saveConfigItems(FILE *fp) {
+bool PololuUsbConnection::saveConfigItems(FILE *fp) {
 
     if (!Connection::Interface::saveConfigItems(fp))
         return false;
@@ -144,7 +121,7 @@ bool TicConnection::saveConfigItems(FILE *fp) {
     return true;
 }
 
-bool TicConnection::ISNewText(const char *dev, const char *name, char *texts[], char *names[], int n)
+bool PololuUsbConnection::ISNewText(const char *dev, const char *name, char *texts[], char *names[], int n)
 {
     if (!strcmp(dev, m_Device->getDeviceName()))
     {
@@ -178,5 +155,10 @@ bool TicConnection::ISNewText(const char *dev, const char *name, char *texts[], 
     }
 
     return Connection::Interface::ISNewText(dev,name,texts,names,n);
+}
+
+TicMediator& PololuUsbConnection::getTicMediator() 
+{ 
+    return *mediator; 
 }
 

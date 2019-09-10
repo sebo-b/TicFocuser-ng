@@ -3,7 +3,7 @@
 #include "TicBase.h"
 #include <string.h>
 
-
+#if 0
 // ---------------------------------------
 
 class SerialStream: public Stream {
@@ -157,6 +157,7 @@ int main() {
 }
 
 // ---------------------------------------
+#endif
 
 static const uint16_t Tic03aCurrentTable[33] =
 {

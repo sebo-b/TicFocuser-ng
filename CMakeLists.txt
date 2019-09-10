@@ -45,10 +45,11 @@ include_directories(
 
 set(indi_ticfocuser-ng_SRCS
         ${CMAKE_CURRENT_SOURCE_DIR}/tic_focuser.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/connection/PololuUsbConnection.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tic/TicBase.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tic/TicUsb.cpp
-   )
+        ${CMAKE_CURRENT_SOURCE_DIR}/connection/PololuUsbConnection.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/connection/mediators/PololuUsbConnectionMediator.cpp
+    )
 
 add_executable(indi_ticfocuser-ng ${indi_ticfocuser-ng_SRCS})
 
