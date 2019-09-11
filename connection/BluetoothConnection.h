@@ -16,42 +16,44 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
-#ifndef USBCONNECTIONBASE_H
-#define USBCONNECTIONBASE_H
+#ifndef BLUETOOTHCONNECTIO_H
+#define BLUETOOTHCONNECTIO_H
 
 #include <connectionplugins/connectioninterface.h>
 #include "TicConnectionInterface.h"
 
 class TicMediatorInterface;
 
-class UsbConnectionBase:
+class BluetoothConnection:
     public Connection::Interface,
     public TicConnectionInterface
 {
     public:
 
-        // serialNFieldName - each derived class must use its own name for UI fields
-        UsbConnectionBase(const char* serialNFieldName, INDI::DefaultDevice *dev);
-        ~UsbConnectionBase();
-        
+        BluetoothConnection(INDI::DefaultDevice *dev);
+        ~BluetoothConnection();
+
+        std::string name() { return "Tic Bluetooth Connection"; };
+        std::string label() { return "Bluetooth"; };
+     
+        bool Connect();
         bool Disconnect();
         void Activated();
         void Deactivated();
 
         bool ISNewText(const char *dev, const char *name, char *texts[], char *names[], int n);
-
         bool saveConfigItems(FILE *fp);
 
         TicMediatorInterface& getTicMediator()   { return *mediator; }
         
     protected:
 
-        IText TicSerialNumberT[1] {};
-        ITextVectorProperty TicSerialNumberTP;
+        IText BtMacAddressT[1] {};
+        ITextVectorProperty BtMacAddressTP;
 
-        std::string requiredSerialNumber;
+        std::string requiredBtMacAddress;
 
         TicMediatorInterface* mediator;
 };
 
-#endif // USBCONNECTIONBASE_H
+#endif // BLUETOOTHCONNECTIO_H

@@ -24,19 +24,28 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
+#ifndef TICBLUETOOTH_H
+#define TICBLUETOOTH_H
 
-#pragma once
+#include "TicBase.h"
+#include "StreamBT.h"
+#include <string>
 
-#include <cstddef>
-#include <cstdint>
+class Stream;
 
-class Stream
-{
+class TicBluetooth: public TicSerial {
+
+	StreamBT stream;
+
 public:
-	virtual ~Stream() {}
-	virtual size_t write(uint8_t byte) = 0;
-    virtual size_t readBytes(char *buffer, size_t length) = 0;
-    virtual size_t readBytes(uint8_t *buffer, size_t length) {
-    	return readBytes((char *) buffer, length);
-        }
+
+	TicBluetooth(uint8_t deviceNumber = 255);
+	~TicBluetooth();
+
+	void connect(const char* btMacAddress);
+	void disconnect();
+
+	const char* getLastErrorMsg();
 };
+
+#endif // TICBLUETOOTH_H

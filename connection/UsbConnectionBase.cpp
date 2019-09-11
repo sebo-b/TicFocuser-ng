@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <indilogger.h>
 #include <string.h>
 
-UsbConnectionBase::UsbConnectionBase(INDI::DefaultDevice *dev):
+UsbConnectionBase::UsbConnectionBase(const char* serialNFieldName, INDI::DefaultDevice *dev):
     Interface(dev, CONNECTION_USB)
 {
     const size_t MAX_SERIAL_NUMBER = 20; // serial number has 8 characters, 20 is super safe
@@ -35,8 +35,11 @@ UsbConnectionBase::UsbConnectionBase(INDI::DefaultDevice *dev):
     	requiredSerialNumber = serialNumber;
     }
 
-    IUFillText(TicSerialNumberT, "TIC_SERIAL_NUMBER", "Tic Serial Number", serialNumber);
-    IUFillTextVector(&TicSerialNumberTP, TicSerialNumberT, 1, getDeviceName(), "TIC_SERIAL_TP", "Tic Serial Number", CONNECTION_TAB,
+    std::string serialNFieldNameTP = serialNFieldName;
+    serialNFieldNameTP += "_TP";
+
+    IUFillText(TicSerialNumberT, serialNFieldName, "Tic Serial Number", serialNumber);
+    IUFillTextVector(&TicSerialNumberTP, TicSerialNumberT, 1, getDeviceName(), serialNFieldNameTP.c_str(), "Tic Serial Number", CONNECTION_TAB,
                      IP_RW, 60, IPS_IDLE);
 };
 

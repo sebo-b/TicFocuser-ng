@@ -24,19 +24,46 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
+#include "TicBluetooth.h"
 
-#pragma once
+#include <string.h>
 
-#include <cstddef>
-#include <cstdint>
-
-class Stream
-{
-public:
-	virtual ~Stream() {}
-	virtual size_t write(uint8_t byte) = 0;
-    virtual size_t readBytes(char *buffer, size_t length) = 0;
-    virtual size_t readBytes(uint8_t *buffer, size_t length) {
-    	return readBytes((char *) buffer, length);
-        }
+enum TicBluetoothError {
+  NO_ERROR = 0,
+  FAILED_TO_CONNECT = -1,
 };
+
+static const char* ticBluetoothErrorMsg[] = 
+{
+  "No error",
+  "Failed to connect",
+};
+
+TicBluetooth::TicBluetooth(uint8_t deviceNumber):
+  TicSerial(stream, deviceNumber)
+{
+  _lastError = NO_ERROR;
+}
+
+TicBluetooth::~TicBluetooth() 
+{
+  disconnect();
+}
+
+void TicBluetooth::connect(const char* serialNo)
+{
+  _lastError = stream.connect(serialNo)? NO_ERROR: FAILED_TO_CONNECT;
+}
+
+void TicBluetooth::disconnect()
+{
+  stream.disconnect();
+}
+
+const char* TicBluetooth::getLastErrorMsg()
+{
+  if (_lastError > 0 || -(int)_lastError <= sizeof(ticBluetoothErrorMsg)/sizeof(ticBluetoothErrorMsg[0]) )
+    return "UNKNOWN";
+
+  return ticBluetoothErrorMsg[ -(int)_lastError ];
+}

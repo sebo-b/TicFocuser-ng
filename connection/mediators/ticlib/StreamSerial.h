@@ -30,13 +30,17 @@ OTHER DEALINGS IN THE SOFTWARE.
 #include <cstddef>
 #include <cstdint>
 
-class Stream
+class StreamSerial
 {
+	int fd;
+
 public:
-	virtual ~Stream() {}
-	virtual size_t write(uint8_t byte) = 0;
-    virtual size_t readBytes(char *buffer, size_t length) = 0;
-    virtual size_t readBytes(uint8_t *buffer, size_t length) {
-    	return readBytes((char *) buffer, length);
-        }
+	StreamSerial();
+	~StreamSerial();
+
+	bool connect(int fd);
+	void disconnect();
+
+	size_t write(uint8_t byte);
+    size_t readBytes(char *buffer, size_t length);
 };

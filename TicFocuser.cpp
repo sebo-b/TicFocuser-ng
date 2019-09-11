@@ -29,7 +29,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "TicFocuser.h"
 #include "connection/PololuUsbConnection.h"
-#include "connection/LibUsbConnection.h"
+//#include "connection/LibUsbConnection.h"
+//#include "connection/BluetoothConnection.h"
 
 #include "TicFocuser_config.h"
 
@@ -104,8 +105,14 @@ bool TicFocuser::initProperties()
     PololuUsbConnection* pololuUsbC = new PololuUsbConnection(this);
     registerConnection(pololuUsbC);
 
-    LibUsbConnection* libUsbC = new LibUsbConnection(this);
-    registerConnection(libUsbC);
+//    LibUsbConnection* libUsbC = new LibUsbConnection(this);
+//    registerConnection(libUsbC);
+//
+//    BluetoothConnection* bluetoothC = new BluetoothConnection(this);
+//    registerConnection(bluetoothC);
+
+//INFO_TAB
+
 
     return true;
 }

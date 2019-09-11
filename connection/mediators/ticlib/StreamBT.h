@@ -27,16 +27,19 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include <cstddef>
-#include <cstdint>
+#include "Stream.h"
 
-class Stream
+class StreamBT: public Stream
 {
+	int btSocket;
+
 public:
-	virtual ~Stream() {}
-	virtual size_t write(uint8_t byte) = 0;
-    virtual size_t readBytes(char *buffer, size_t length) = 0;
-    virtual size_t readBytes(uint8_t *buffer, size_t length) {
-    	return readBytes((char *) buffer, length);
-        }
+	StreamBT();
+	~StreamBT();
+
+	bool connect(const char* btMacAddress);
+	void disconnect();
+
+	size_t write(uint8_t byte);
+    size_t readBytes(char *buffer, size_t length);
 };

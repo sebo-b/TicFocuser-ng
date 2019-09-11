@@ -16,36 +16,26 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
-#ifndef TICMEDIATORINTERFACE_H
-#define TICMEDIATORINTERFACE_H
+#ifndef BLUETOOTHCONNECTIONMEDIATOR_H
+#define BLUETOOTHCONNECTIONMEDIATOR_H
 
-class TicMediatorInterface
+#error
+
+#include "TicBaseConnectionMediator.h"
+
+class BluetoothConnectionMediator: public TicBaseConnectionMediator
 {
 public:
 
-	virtual ~TicMediatorInterface() {}
+	BluetoothConnectionMediator();
+    ~BluetoothConnectionMediator();
 
-    virtual bool connect() = 0;
-    virtual bool disconnect() = 0;
+    bool connect()  { return false; }
+    bool connect(const char* btMacAddress);
+    bool disconnect();
 
-	virtual bool energize() = 0;
-	virtual bool deenergize() = 0;
-
-	virtual bool exitSafeStart() = 0;
-	virtual bool haltAndHold() = 0;
-
-	virtual bool setTargetPosition(int position) = 0;
-	virtual bool haltAndSetPosition(int position) = 0;
-
-	class TicVariables {
-	public:
-		int currentPosition;
-		int targetPosition;
-	};
-
-	virtual bool getVariables(TicVariables*) = 0;
-
-	virtual const char* getLastErrorMsg() = 0;
+    const char* getLastErrorMsg();
+    const char* getSerialNumber();
 };
 
-#endif // TICMEDIATORINTERFACE_H
+#endif // BLUETOOTHCONNECTIONMEDIATOR_H

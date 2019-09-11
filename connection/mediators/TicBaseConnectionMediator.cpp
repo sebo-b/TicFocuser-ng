@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "ticlib/TicBase.h"
 #include <cstring>
 
+#error
 
 bool TicBaseConnectionMediator::energize()
 {

@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <tic.h>
 
 LibUsbConnection::LibUsbConnection(INDI::DefaultDevice *dev):
-    UsbConnectionBase(dev)
+    UsbConnectionBase("LIBUSB_SERIAL_NUMBER",dev)
 {
     mediator = new LibUsbConnectionMediator();
 };

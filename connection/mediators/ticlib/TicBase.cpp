@@ -64,70 +64,7 @@ size_t SerialStream::readBytes(char *buffer, size_t length) {
 // ---------------------------------------
 
 // ---------------------------------------
-#include <bluetooth/bluetooth.h>
-#include <bluetooth/rfcomm.h>
 
-class BluetoothStream: public Stream {
-  
-  int sk;
-
-public:
-  BluetoothStream(const char* btaddr);
-  ~BluetoothStream();
-
-  size_t write(uint8_t byte);
-  size_t readBytes(char *buffer, size_t length);
-};
-
-
-BluetoothStream::BluetoothStream(const char* btaddr) {
-
-  struct sockaddr_rc laddr, raddr;
-
-  laddr.rc_family = AF_BLUETOOTH;
-  laddr.rc_channel = 0;
-  str2ba("00:00:00:00:00:00",&laddr.rc_bdaddr);
-  //bacpy(&laddr.rc_bdaddr,BDADDR_ANY);
-
-  raddr.rc_family = AF_BLUETOOTH;
-  raddr.rc_channel = 1;
-  str2ba(btaddr,&raddr.rc_bdaddr);
-
-  sk = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
-  if (sk < 0) {
-    perror("Can't create RFCOMM socket");
-    return;
-  }
-
-  if (bind(sk, (struct sockaddr *) &laddr, sizeof(laddr)) < 0) {
-    perror("Can't bind RFCOMM socket");
-    close(sk);
-    return;
-  }
-
-  if (connect(sk, (struct sockaddr *) &raddr, sizeof(raddr)) < 0) {
-    perror("Can't connect RFCOMM socket");
-    close(sk);
-    return;
-  }
-}
-
-BluetoothStream::~BluetoothStream() {
-  if (sk >= 0)
-    close(sk);
-}
-size_t BluetoothStream::write(uint8_t byte) {
-//  printf("write %x to sock %d\n",byte,sk);
-  size_t ret = ::write(sk,&byte,sizeof(byte));
-//  printf("written %d\n",ret);
-  return ret;
-}
-size_t BluetoothStream::readBytes(char *buffer, size_t length) {
-//  printf("read request len = %d\n",length);  
-  size_t ret = ::read(sk, buffer, length);
-//  printf("read %d bytes\n",ret);
-  return ret;
-}
 
 // ---------------------------------------
 #include <stdio.h>

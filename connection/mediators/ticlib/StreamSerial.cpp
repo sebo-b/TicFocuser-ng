@@ -1,6 +1,6 @@
 /*******************************************************************************
 TicFocuser
-Copyright (C) 2019 Sebastian Baberowski
+Copyright (C) 2019 Sebastian BaberowbtSocketi
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -24,19 +24,39 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
+#include "StreamSerial.h"
 
-#pragma once
+#include <unistd.h>
 
-#include <cstddef>
-#include <cstdint>
 
-class Stream
+StreamSerial::StreamSerial():
+	fd(-1)
 {
-public:
-	virtual ~Stream() {}
-	virtual size_t write(uint8_t byte) = 0;
-    virtual size_t readBytes(char *buffer, size_t length) = 0;
-    virtual size_t readBytes(uint8_t *buffer, size_t length) {
-    	return readBytes((char *) buffer, length);
-        }
-};
+}
+
+StreamSerial::~StreamSerial()
+{
+	disconnect();
+}
+
+bool StreamSerial::connect(int fd)
+{
+  StreamSerial::fd = fd;
+  return true;
+}
+
+void StreamSerial::disconnect()
+{
+	fd = -1;
+}
+
+size_t StreamSerial::write(uint8_t byte)
+{
+  return ::write(fd,&byte,sizeof(byte));
+}
+
+size_t StreamSerial::readBytes(char *buffer, size_t length)
+{
+  return ::read(fd, buffer, length);
+}
+

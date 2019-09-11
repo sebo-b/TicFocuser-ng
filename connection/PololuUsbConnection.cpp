@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <tic.h>
 
 PololuUsbConnection::PololuUsbConnection(INDI::DefaultDevice *dev):
-    UsbConnectionBase(dev)
+    UsbConnectionBase("PUSB_SERIAL_NUMBER",dev)
 {
     mediator = new PololuUsbConnectionMediator();
 };
