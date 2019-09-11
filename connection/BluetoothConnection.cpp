@@ -18,9 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "BluetoothConnection.h"
 
-#include "mediators/TiclibInterface.h"
-#include "mediators/ticlib/TicBase.h"
-#include "mediators/ticlib/StreamBT.h"
+#include "driver_interfaces/TiclibInterface.h"
+#include "ticlib/TicBase.h"
+#include "ticlib/StreamBT.h"
 
 #include <indilogger.h>
 #include <string.h>

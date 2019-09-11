@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
 #include "UsbConnectionBase.h"
-#include "mediators/TicDriverInterface.h"
+#include "driver_interfaces/TicDriverInterface.h"
 
 #include <indilogger.h>
 #include <string.h>

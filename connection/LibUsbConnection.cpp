@@ -18,8 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "LibUsbConnection.h"
 
-#include "mediators/TiclibInterface.h"
-#include "mediators/ticlib/TicUsb.h"
+#include "driver_interfaces/TiclibInterface.h"
+#include "ticlib/TicUsb.h"
 
 #include <string.h>
 #include <indilogger.h>

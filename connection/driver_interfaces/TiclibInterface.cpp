@@ -16,8 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
-#include "PololuUsbInterface.h"
-#include <tic.h>
+#include "TiclibInterface.h"
+#include "connection/ticlib/TicBase.h"
 #include <cstring>
 
 /*
@@ -31,101 +31,100 @@ public:
     operator bool()                     { return error; }
 };*/
 
-bool PololuUsbInterface::energize()
+bool TiclibInterface::energize()
 {
-    tic_error* err = tic_energize(handle);
-    if (err) {
-        lastErrorMsg = tic_error_get_message(err);
-        tic_error_free(err);
+    ticBase.energize();
+    if (ticBase.getLastError()) 
+    {
+        lastErrorMsg = "Energize error";
         return false;
     }
-    lastErrorMsg = "OK";
 
+    lastErrorMsg = "OK";
 	return true;
 }
 
-bool PololuUsbInterface::deenergize()
+bool TiclibInterface::deenergize()
 {
-    tic_error* err = tic_deenergize(handle);
-    if (err) {
-        lastErrorMsg = tic_error_get_message(err);
-        tic_error_free(err);
+     ticBase.deenergize();
+    if (ticBase.getLastError()) 
+    {
+        lastErrorMsg = "De-energize error";
         return false;
     }
-    lastErrorMsg = "OK";
-    
-    return true;
 
-}
-
-bool PololuUsbInterface::exitSafeStart()
-{
-    tic_error* err = tic_exit_safe_start(handle);
-    if (err) {
-        lastErrorMsg = tic_error_get_message(err);
-        tic_error_free(err);
-        return false;
-    }
     lastErrorMsg = "OK";
-    
     return true;
 }
 
-bool PololuUsbInterface::haltAndHold()
+bool TiclibInterface::exitSafeStart()
 {
-    tic_error* err = tic_halt_and_hold(handle);
-    if (err) {
-        lastErrorMsg = tic_error_get_message(err);
-        tic_error_free(err);
+    ticBase.exitSafeStart();
+    if (ticBase.getLastError()) 
+    {
+        lastErrorMsg = "ExitSafeStart error";
         return false;
     }
+
     lastErrorMsg = "OK";
-    
     return true;
 }
 
-bool PololuUsbInterface::setTargetPosition(int position)
+bool TiclibInterface::haltAndHold()
 {
-    tic_error* err = tic_set_target_position(handle, position);
-    if (err) {
-        lastErrorMsg = tic_error_get_message(err);
-        tic_error_free(err);
+    ticBase.haltAndHold();
+    if (ticBase.getLastError()) 
+    {
+        lastErrorMsg = "HaltAndHold error";
         return false;
     }
+
     lastErrorMsg = "OK";
-    
     return true;
 }
 
-bool PololuUsbInterface::haltAndSetPosition(int position)
+bool TiclibInterface::setTargetPosition(int position)
 {
-    tic_error* err = tic_halt_and_set_position(handle, position);
-    if (err) {
-        lastErrorMsg = tic_error_get_message(err);
-        tic_error_free(err);
+    ticBase.setTargetPosition(position);
+    if (ticBase.getLastError()) 
+    {
+        lastErrorMsg = "SetTargetPosition error";
         return false;
     }
+
     lastErrorMsg = "OK";
-    
     return true;
 }
 
-bool PololuUsbInterface::getVariables(TicVariables* vars)
+bool TiclibInterface::haltAndSetPosition(int position)
 {
-    tic_variables* variables = NULL;
+    ticBase.haltAndSetPosition(position);
+    if (ticBase.getLastError()) 
+    {
+        lastErrorMsg = "HaltAndSetPosition error";
+        return false;
+    }
 
-    tic_error* err  = tic_get_variables(handle,&variables,false);
-    if (err) {
-        lastErrorMsg = tic_error_get_message(err);
-        tic_error_free(err);
+    lastErrorMsg = "OK";
+    return true;
+}
+
+bool TiclibInterface::getVariables(TicVariables* vars)
+{
+    vars->targetPosition = ticBase.getTargetPosition();
+    if (ticBase.getLastError())
+    {
+        lastErrorMsg = "GetTargetPosition error";
+        return false;
+    }
+
+    vars->currentPosition = ticBase.getCurrentPosition();
+    if (ticBase.getLastError())
+    {
+        lastErrorMsg = "GetCurrentPosition error";
         return false;
     }
     lastErrorMsg = "OK";
-
-    vars->currentPosition = tic_variables_get_current_position(variables);
-    vars->targetPosition = tic_variables_get_target_position(variables);
-
-    tic_variables_free(variables);
     return true;
 }
 

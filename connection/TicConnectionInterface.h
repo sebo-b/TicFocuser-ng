@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef TICCONNECTIONINTERFACE_H
 #define TICCONNECTIONINTERFACE_H
 
-#include "mediators/TicDriverInterface.h"
+#include "driver_interfaces/TicDriverInterface.h"
 
 class TicConnectionInterface
 {

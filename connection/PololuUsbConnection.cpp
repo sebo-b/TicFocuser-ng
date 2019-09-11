@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "PololuUsbConnection.h"
 
-#include "mediators/PololuUsbInterface.h"
+#include "driver_interfaces/PololuUsbInterface.h"
 
 #include <string.h>
 #include <indilogger.h>
