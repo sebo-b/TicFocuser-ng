@@ -207,9 +207,9 @@ void TicFocuser::TimerHit()
         return;
 
     TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
-    TicMediator& mediator = conn->getTicMediator();
+    TicMediatorInterface& mediator = conn->getTicMediator();
 
-    TicMediator::TicVariables ticVariables;
+    TicMediatorInterface::TicVariables ticVariables;
     bool res = mediator.getVariables(&ticVariables);
 
     if (res) {
@@ -247,7 +247,7 @@ void TicFocuser::TimerHit()
 bool TicFocuser::energizeFocuser()
 {
     TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
-    TicMediator& mediator = conn->getTicMediator();
+    TicMediatorInterface& mediator = conn->getTicMediator();
 
     if (!mediator.energize()) 
     {
@@ -268,7 +268,7 @@ bool TicFocuser::energizeFocuser()
 bool TicFocuser::deenergizeFocuser()
 {
     TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
-    TicMediator& mediator = conn->getTicMediator();
+    TicMediatorInterface& mediator = conn->getTicMediator();
 
     if (!mediator.deenergize())
     {
@@ -286,7 +286,7 @@ bool TicFocuser::deenergizeFocuser()
 bool TicFocuser::SyncFocuser(uint32_t ticks) 
 {
     TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
-    TicMediator& mediator = conn->getTicMediator();
+    TicMediatorInterface& mediator = conn->getTicMediator();
 
     if (!mediator.haltAndSetPosition(ticks))
     {
@@ -302,7 +302,7 @@ bool TicFocuser::AbortFocuser()
 {
 
     TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
-    TicMediator& mediator = conn->getTicMediator();
+    TicMediatorInterface& mediator = conn->getTicMediator();
 
     if (!mediator.haltAndHold())
     {
@@ -356,7 +356,7 @@ IPState TicFocuser::MoveAbsFocuser(uint32_t ticks)
     }
 
     TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
-    TicMediator& mediator = conn->getTicMediator();
+    TicMediatorInterface& mediator = conn->getTicMediator();
 
     if (!mediator.setTargetPosition(ticks))
     {

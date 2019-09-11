@@ -48,14 +48,11 @@ TicUsb::~TicUsb()
   context = NULL;
 }
 
-#include <indilogger.h>
-
 void TicUsb::connect(const char* serialNo)
 {
   if (!context)
     return;
 
-//  INDI::Logger::getInstance().print("TIC Focuser NG",INDI::Logger::DBG_WARNING, __FILE__, __LINE__,"jest context");
   disconnect();
 
   libusb_device** devs = NULL;

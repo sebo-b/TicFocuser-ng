@@ -19,13 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef POLOLUUSBCONNECTIONMEDIATOR_H
 #define POLOLUUSBCONNECTIONMEDIATOR_H
 
-#include "../TicMediator.h"
+#include "TicMediatorInterface.h"
 #include <string>
 
 struct tic_handle;
 struct tic_error;
 
-class PololuUsbConnectionMediator: public TicMediator
+class PololuUsbConnectionMediator: public TicMediatorInterface
 {
 
 	tic_handle* handle;
@@ -57,7 +57,7 @@ public:
     bool setTargetPosition(int position);
     bool haltAndSetPosition(int position);
 
-    bool getVariables(TicMediator::TicVariables* vars);
+    bool getVariables(TicMediatorInterface::TicVariables* vars);
 
     const char* getLastErrorMsg();
 

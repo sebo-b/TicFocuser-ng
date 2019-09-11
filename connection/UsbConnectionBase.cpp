@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
 #include "UsbConnectionBase.h"
-#include "TicMediator.h"
+#include "mediators/TicMediatorInterface.h"
 
 #include <indilogger.h>
 #include <string.h>

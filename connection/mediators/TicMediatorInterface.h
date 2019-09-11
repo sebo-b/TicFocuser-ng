@@ -16,14 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
-#ifndef TICMEDIATOR_H
-#define TICMEDIATOR_H
+#ifndef TICMEDIATORINTERFACE_H
+#define TICMEDIATORINTERFACE_H
 
-class TicMediator
+class TicMediatorInterface
 {
 public:
 
-	virtual ~TicMediator() {}
+	virtual ~TicMediatorInterface() {}
 
     virtual bool connect() = 0;
     virtual bool disconnect() = 0;
@@ -49,4 +49,4 @@ public:
 	virtual const char* getLastErrorMsg() = 0;
 };
 
-#endif // TICMEDIATOR_H
+#endif // TICMEDIATORINTERFACE_H

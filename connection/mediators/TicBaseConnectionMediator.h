@@ -19,11 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef TICBASECONNECTIONMEDIATOR_H
 #define TICBASECONNECTIONMEDIATOR_H
 
-#include "../TicMediator.h"
+#include "TicMediatorInterface.h"
 
 class TicBase;
 
-class TicBaseConnectionMediator: public TicMediator
+class TicBaseConnectionMediator: public TicMediatorInterface
 {
 protected:
 
@@ -38,7 +38,7 @@ public:
     bool setTargetPosition(int position);
     bool haltAndSetPosition(int position);
 
-    bool getVariables(TicMediator::TicVariables* vars);
+    bool getVariables(TicMediatorInterface::TicVariables* vars);
 
 };
 

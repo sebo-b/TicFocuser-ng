@@ -119,7 +119,7 @@ bool PololuUsbConnectionMediator::haltAndSetPosition(int position)
 	return !(error = tic_halt_and_set_position(handle, position));
 }
 
-bool PololuUsbConnectionMediator::getVariables(TicMediator::TicVariables* vars)
+bool PololuUsbConnectionMediator::getVariables(TicMediatorInterface::TicVariables* vars)
 {
     tic_variables* variables = NULL;
 

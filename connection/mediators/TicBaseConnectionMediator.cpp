@@ -57,7 +57,7 @@ bool TicBaseConnectionMediator::haltAndSetPosition(int position)
     return !ticBase->getLastError();
 }
 
-bool TicBaseConnectionMediator::getVariables(TicMediator::TicVariables* vars)
+bool TicBaseConnectionMediator::getVariables(TicMediatorInterface::TicVariables* vars)
 {
     vars->targetPosition = ticBase->getTargetPosition();
     if (ticBase->getLastError())
