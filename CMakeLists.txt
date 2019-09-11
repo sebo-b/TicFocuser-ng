@@ -45,14 +45,14 @@ include_directories(
 
 set(indi_ticfocuser-ng_SRCS
         ${CMAKE_CURRENT_SOURCE_DIR}/TicFocuser.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/tic/TicBase.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/tic/TicUsb.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/connection/UsbConnectionBase.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/connection/PololuUsbConnection.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/connection/LibUsbConnection.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/connection/mediators/PololuUsbConnectionMediator.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/connection/mediators/TicBaseConnectionMediator.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/connection/mediators/LibUsbConnectionMediator.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/connection/mediators/ticlib/TicBase.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/connection/mediators/ticlib/TicUsb.cpp
 
     )
 

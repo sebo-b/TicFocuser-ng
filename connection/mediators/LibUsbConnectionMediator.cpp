@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "LibUsbConnectionMediator.h"
 #include <cstring>
 
-#include "tic/TicUsb.h"
+#include "ticlib/TicUsb.h"
 
 
 LibUsbConnectionMediator::LibUsbConnectionMediator()

@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
 #include "TicBaseConnectionMediator.h"
-#include <tic/TicBase.h>
+#include "ticlib/TicBase.h"
 #include <cstring>
 
 
