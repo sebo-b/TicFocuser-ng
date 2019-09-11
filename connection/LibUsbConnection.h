@@ -22,14 +22,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <connectionplugins/connectioninterface.h>
 #include "UsbConnectionBase.h"
 
+class TicUsb;
+
 class LibUsbConnection: public UsbConnectionBase
 {
+
+	TicUsb* ticUsb;
+
     public:
 
         LibUsbConnection(INDI::DefaultDevice *dev);
         ~LibUsbConnection();
         
         bool Connect();
+        bool Disconnect();
 
         std::string name() { return "Lib USB Connection"; };
         std::string label() { return "LibUSB"; };

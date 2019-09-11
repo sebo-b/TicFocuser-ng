@@ -17,7 +17,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
 #include "BluetoothConnection.h"
-#include "mediators/BluetoothConnectionMediator.h"
+
+#include "mediators/TiclibInterface.h"
+#include "mediators/ticlib/TicBase.h"
+#include "mediators/ticlib/StreamBT.h"
 
 #include <indilogger.h>
 #include <string.h>
@@ -42,27 +45,28 @@ BluetoothConnection::BluetoothConnection(INDI::DefaultDevice *dev):
                      IP_RW, 60, IPS_IDLE);
     LOG_WARN("IUFillText in BluetoothConnection");
 
+    streamBT = new StreamBT;
+    ticSerial = new TicSerial(*streamBT);
 
-
-    mediator = new BluetoothConnectionMediator();
+    ticDriverInterface = new  TiclibInterface(*ticSerial);
 }
 
 BluetoothConnection::~BluetoothConnection() 
 {
-    delete mediator;
+    delete ticDriverInterface;
+    delete ticSerial;
+    delete streamBT;
 }
 
 bool BluetoothConnection::Connect()
 {
-    BluetoothConnectionMediator* btMediator = static_cast<BluetoothConnectionMediator*>(mediator);
-    
-    if (!btMediator->connect( requiredBtMacAddress.c_str() )) 
+    if (!streamBT->connect(requiredBtMacAddress.c_str()))
     {
-        LOGF_ERROR("Bluetooth connection error: %s",mediator->getLastErrorMsg());
+        LOGF_ERROR("Cannot connect to bluetooth device with MAC address %s", requiredBtMacAddress.c_str());
         return false;
     }
 
-    LOGF_INFO("Connected to Bluetooth device with mac: %s",requiredBtMacAddress.c_str());
+    LOGF_INFO("Connected to Bluetooth device with MAC: %s",requiredBtMacAddress.c_str());
 
     BtMacAddressTP.s = IPS_OK;
     IUSaveText(BtMacAddressT, requiredBtMacAddress.c_str());
@@ -73,15 +77,10 @@ bool BluetoothConnection::Connect()
 
 bool BluetoothConnection::Disconnect() 
 { 
-    bool res = mediator->disconnect();
-    if (!res)
-        LOGF_ERROR("Disconnecting error: %s.", mediator->getLastErrorMsg());
+    streamBT->disconnect();
 
-    BtMacAddressTP.s = IPS_IDLE;
-    IUSaveText(BtMacAddressT, requiredBtMacAddress.c_str());
-    IDSetText(&BtMacAddressTP, nullptr);
-
-    return res;
+    LOG_INFO("Bluetooth disconnected.");
+    return true;
 }
 
 void BluetoothConnection::Activated() 

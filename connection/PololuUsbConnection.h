@@ -22,17 +22,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <connectionplugins/connectioninterface.h>
 #include "UsbConnectionBase.h"
 
+class tic_handle;
+
 class PololuUsbConnection: public UsbConnectionBase
 {
+	tic_handle* handle;
+
     public:
 
         PololuUsbConnection(INDI::DefaultDevice *dev);
         ~PololuUsbConnection();
         
         bool Connect();
+        bool Disconnect();
 
         std::string name() { return "Pololu USB Connection"; };
         std::string label() { return "PololuUSB"; };
+
 };
 
 #endif // POLOLUUSBCONNECTION_H

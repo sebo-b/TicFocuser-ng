@@ -16,36 +16,35 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
-#ifndef TICMEDIATORINTERFACE_H
-#define TICMEDIATORINTERFACE_H
+#ifndef POLOLUUSBINTERFACE_H
+#define POLOLUUSBINTERFACE_H
 
-class TicMediatorInterface
+#include "TicDriverInterface.h"
+#include <string>
+
+struct tic_handle;
+
+class PololuUsbInterface: public TicDriverInterface
 {
+	tic_handle*& handle;
+	std::string lastErrorMsg;
+
 public:
 
-	virtual ~TicMediatorInterface() {}
+	PololuUsbInterface(tic_handle*& handle): handle( handle)	{}
 
-    virtual bool connect() = 0;
-    virtual bool disconnect() = 0;
+	bool energize();
+	bool deenergize();
 
-	virtual bool energize() = 0;
-	virtual bool deenergize() = 0;
+	bool exitSafeStart();
+	bool haltAndHold();
 
-	virtual bool exitSafeStart() = 0;
-	virtual bool haltAndHold() = 0;
+	bool setTargetPosition(int position);
+	bool haltAndSetPosition(int position);
 
-	virtual bool setTargetPosition(int position) = 0;
-	virtual bool haltAndSetPosition(int position) = 0;
+	bool getVariables(TicVariables*);
 
-	class TicVariables {
-	public:
-		int currentPosition;
-		int targetPosition;
-	};
-
-	virtual bool getVariables(TicVariables*) = 0;
-
-	virtual const char* getLastErrorMsg() = 0;
+	const char* getLastErrorMsg()	{ return lastErrorMsg.c_str(); }
 };
 
-#endif // TICMEDIATORINTERFACE_H
+#endif // POLOLUUSBINTERFACE_H

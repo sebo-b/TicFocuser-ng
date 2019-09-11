@@ -18,51 +18,53 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "LibUsbConnection.h"
 
-#include "mediators/LibUsbConnectionMediator.h"
-#include <string.h>
+#include "mediators/TiclibInterface.h"
+#include "mediators/ticlib/TicUsb.h"
 
+#include <string.h>
 #include <indilogger.h>
-#include <tic.h>
 
 LibUsbConnection::LibUsbConnection(INDI::DefaultDevice *dev):
     UsbConnectionBase("LIBUSB_SERIAL_NUMBER",dev)
+
 {
-    mediator = new LibUsbConnectionMediator();
-};
+    ticUsb = new TicUsb();
+    ticDriverInterface = new TiclibInterface(*ticUsb);
+}
 
 LibUsbConnection::~LibUsbConnection() 
 {
-    delete mediator;
-};
+    delete ticDriverInterface;
+    delete ticUsb;
+}
 
 bool LibUsbConnection::Connect() 
-{ 
-    LibUsbConnectionMediator* usbMediator = static_cast<LibUsbConnectionMediator*>(mediator);
-    
-    if (!usbMediator->connect( requiredSerialNumber.c_str() )) 
-    {
-        const char* errorMsg = mediator->getLastErrorMsg();
+{
+    Disconnect();
 
-        if (errorMsg) 
-        {
-            LOGF_ERROR("Tic error: %s",errorMsg);
-        }
+    ticUsb->connect(requiredSerialNumber.c_str());
+    if (ticUsb->getLastError())
+    {
+        LOGF_ERROR("TicUsb error: %s",ticUsb->getLastErrorMsg());
+        if (requiredSerialNumber.empty())
+            LOG_ERROR("No TIC device found.");
         else
-        {
-            if (requiredSerialNumber.empty())
-                LOG_ERROR("No TIC device found.");
-            else
-                LOGF_ERROR("No TIC device found with serial: %s. You can set serial to empty to connect to the first found Tic device.", requiredSerialNumber.c_str());
-        }
+            LOGF_ERROR("No TIC device found with serial: %s. You can set serial to empty to connect to the first found Tic device.", requiredSerialNumber.c_str());
 
         return false;
     }
 
-    LOGF_INFO("Connected to Tic with serial: %s",usbMediator->getSerialNumber());
+    LOGF_INFO("Connected to Tic with serial: %s",ticUsb->getSerial());
 
     TicSerialNumberTP.s = requiredSerialNumber.empty()? IPS_IDLE: IPS_OK;
-    IUSaveText(TicSerialNumberT, usbMediator->getSerialNumber());
+    IUSaveText(TicSerialNumberT, ticUsb->getSerial());
     IDSetText(&TicSerialNumberTP, nullptr);
 
     return true;
-};
+}
+
+bool LibUsbConnection::Disconnect() 
+{
+    ticUsb->disconnect();
+    return true;
+}

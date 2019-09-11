@@ -22,7 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <connectionplugins/connectioninterface.h>
 #include "TicConnectionInterface.h"
 
-class TicMediatorInterface;
+class StreamBT;
+class TicSerial;
 
 class BluetoothConnection:
     public Connection::Interface,
@@ -44,7 +45,7 @@ class BluetoothConnection:
         bool ISNewText(const char *dev, const char *name, char *texts[], char *names[], int n);
         bool saveConfigItems(FILE *fp);
 
-        TicMediatorInterface& getTicMediator()   { return *mediator; }
+        TicDriverInterface& getTicDriverInterface()   { return *ticDriverInterface; }
         
     protected:
 
@@ -53,7 +54,10 @@ class BluetoothConnection:
 
         std::string requiredBtMacAddress;
 
-        TicMediatorInterface* mediator;
+        class ::TicDriverInterface* ticDriverInterface;
+
+        StreamBT* streamBT;
+        TicSerial* ticSerial;
 };
 
 #endif // BLUETOOTHCONNECTIO_H

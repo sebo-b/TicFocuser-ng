@@ -29,8 +29,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "TicFocuser.h"
 #include "connection/PololuUsbConnection.h"
-//#include "connection/LibUsbConnection.h"
-//#include "connection/BluetoothConnection.h"
+#include "connection/LibUsbConnection.h"
+#include "connection/BluetoothConnection.h"
 
 #include "TicFocuser_config.h"
 
@@ -105,11 +105,11 @@ bool TicFocuser::initProperties()
     PololuUsbConnection* pololuUsbC = new PololuUsbConnection(this);
     registerConnection(pololuUsbC);
 
-//    LibUsbConnection* libUsbC = new LibUsbConnection(this);
-//    registerConnection(libUsbC);
-//
-//    BluetoothConnection* bluetoothC = new BluetoothConnection(this);
-//    registerConnection(bluetoothC);
+    LibUsbConnection* libUsbC = new LibUsbConnection(this);
+    registerConnection(libUsbC);
+
+    BluetoothConnection* bluetoothC = new BluetoothConnection(this);
+    registerConnection(bluetoothC);
 
 //INFO_TAB
 
@@ -214,9 +214,9 @@ void TicFocuser::TimerHit()
         return;
 
     TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
-    TicMediatorInterface& mediator = conn->getTicMediator();
+    TicDriverInterface& mediator = conn->getTicDriverInterface();
 
-    TicMediatorInterface::TicVariables ticVariables;
+    TicDriverInterface::TicVariables ticVariables;
     bool res = mediator.getVariables(&ticVariables);
 
     if (res) {
@@ -254,7 +254,7 @@ void TicFocuser::TimerHit()
 bool TicFocuser::energizeFocuser()
 {
     TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
-    TicMediatorInterface& mediator = conn->getTicMediator();
+    TicDriverInterface& mediator = conn->getTicDriverInterface();
 
     if (!mediator.energize()) 
     {
@@ -275,7 +275,7 @@ bool TicFocuser::energizeFocuser()
 bool TicFocuser::deenergizeFocuser()
 {
     TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
-    TicMediatorInterface& mediator = conn->getTicMediator();
+    TicDriverInterface& mediator = conn->getTicDriverInterface();
 
     if (!mediator.deenergize())
     {
@@ -293,7 +293,7 @@ bool TicFocuser::deenergizeFocuser()
 bool TicFocuser::SyncFocuser(uint32_t ticks) 
 {
     TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
-    TicMediatorInterface& mediator = conn->getTicMediator();
+    TicDriverInterface& mediator = conn->getTicDriverInterface();
 
     if (!mediator.haltAndSetPosition(ticks))
     {
@@ -309,7 +309,7 @@ bool TicFocuser::AbortFocuser()
 {
 
     TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
-    TicMediatorInterface& mediator = conn->getTicMediator();
+    TicDriverInterface& mediator = conn->getTicDriverInterface();
 
     if (!mediator.haltAndHold())
     {
@@ -363,7 +363,7 @@ IPState TicFocuser::MoveAbsFocuser(uint32_t ticks)
     }
 
     TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
-    TicMediatorInterface& mediator = conn->getTicMediator();
+    TicDriverInterface& mediator = conn->getTicDriverInterface();
 
     if (!mediator.setTargetPosition(ticks))
     {

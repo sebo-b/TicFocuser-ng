@@ -16,41 +16,38 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
-#include "LibUsbConnectionMediator.h"
-#include <cstring>
+#ifndef TICLIBINTERFACE_H
+#define TICLIBINTERFACE_H
 
-#include "ticlib/TicUsb.h"
+#include "TicDriverInterface.h"
+#include <string>
 
-#error
+class TicBase;
 
-LibUsbConnectionMediator::LibUsbConnectionMediator()
+/**
+ * Interface class (a wrapper) for ticlib
+ */
+class TiclibInterface: public TicDriverInterface
 {
-    ticBase = new TicUsb();
-}
+	TicBase& ticBase;
+	std::string lastErrorMsg;
 
-LibUsbConnectionMediator::~LibUsbConnectionMediator() 
-{
-    delete ticBase;
-}
+public:
 
-bool LibUsbConnectionMediator::connect(const char* requiredSerialNumber)
-{
-    static_cast<TicUsb*>(ticBase)->connect(requiredSerialNumber);
-    return !ticBase->getLastError();
-}
+	TiclibInterface(TicBase& ticBase): ticBase( ticBase)	{}
 
-bool LibUsbConnectionMediator::disconnect()
-{
-	static_cast<TicUsb*>(ticBase)->disconnect();
-    return true;
-}
+	bool energize();
+	bool deenergize();
 
-const char* LibUsbConnectionMediator::getLastErrorMsg()
-{
-    return static_cast<TicUsb*>(ticBase)->getLastErrorMsg();
-}
+	bool exitSafeStart();
+	bool haltAndHold();
 
-const char* LibUsbConnectionMediator::getSerialNumber()
-{
-	return static_cast<TicUsb*>(ticBase)->getSerial();
-}
+	bool setTargetPosition(int position);
+	bool haltAndSetPosition(int position);
+
+	bool getVariables(TicVariables*);
+
+	const char* getLastErrorMsg()	{ return lastErrorMsg.c_str(); }
+};
+
+#endif // TICLIBINTERFACE_H

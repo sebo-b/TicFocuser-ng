@@ -19,13 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef TICCONNECTIONINTERFACE_H
 #define TICCONNECTIONINTERFACE_H
 
-#include "mediators/TicMediatorInterface.h"
+#include "mediators/TicDriverInterface.h"
 
 class TicConnectionInterface
 {
 public:
 	virtual ~TicConnectionInterface() {}
-	virtual TicMediatorInterface& getTicMediator() = 0;
+	virtual TicDriverInterface& getTicDriverInterface() = 0;
 };
 
 #endif // TICCONNECTIONINTERFACE_H

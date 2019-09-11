@@ -47,16 +47,13 @@ set(indi_ticfocuser-ng_SRCS
         ${CMAKE_CURRENT_SOURCE_DIR}/TicFocuser.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/connection/UsbConnectionBase.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/connection/PololuUsbConnection.cpp
-#        ${CMAKE_CURRENT_SOURCE_DIR}/connection/LibUsbConnection.cpp
-#        ${CMAKE_CURRENT_SOURCE_DIR}/connection/BluetoothConnection.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/connection/mediators/PololuUsbConnectionMediator.cpp
-#        ${CMAKE_CURRENT_SOURCE_DIR}/connection/mediators/TicBaseConnectionMediator.cpp
-#        ${CMAKE_CURRENT_SOURCE_DIR}/connection/mediators/LibUsbConnectionMediator.cpp
-#        ${CMAKE_CURRENT_SOURCE_DIR}/connection/mediators/BluetoothConnectionMediator.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/connection/LibUsbConnection.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/connection/mediators/PololuUsbInterface.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/connection/mediators/TiclibInterface.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/connection/BluetoothConnection.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/connection/mediators/ticlib/TicBase.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/connection/mediators/ticlib/TicUsb.cpp
-#        ${CMAKE_CURRENT_SOURCE_DIR}/connection/mediators/ticlib/TicBluetooth.cpp
-#        ${CMAKE_CURRENT_SOURCE_DIR}/connection/mediators/ticlib/StreamBT.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/connection/mediators/ticlib/StreamBT.cpp
 #        ${CMAKE_CURRENT_SOURCE_DIR}/connection/mediators/ticlib/StreamSerial.cpp
     )
 

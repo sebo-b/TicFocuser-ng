@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
 #include "UsbConnectionBase.h"
-#include "mediators/TicMediatorInterface.h"
+#include "mediators/TicDriverInterface.h"
 
 #include <indilogger.h>
 #include <string.h>
@@ -48,26 +48,26 @@ UsbConnectionBase::~UsbConnectionBase()
 };
 
 bool UsbConnectionBase::Disconnect() 
-{ 
-    bool res = mediator->disconnect();
-    if (!res)
-        LOGF_ERROR("Disconnecting error: %s.", mediator->getLastErrorMsg());
-
+{
     IUSaveText(TicSerialNumberT, requiredSerialNumber.c_str());
     TicSerialNumberTP.s = requiredSerialNumber.empty()? IPS_IDLE: IPS_OK;
     IDSetText(&TicSerialNumberTP, nullptr);
 
-    return res;
+    return true; //Connection::Interface::Disconnect();
 };
 
 void UsbConnectionBase::Activated() 
 {
     m_Device->defineText(&TicSerialNumberTP);
+
+    //Connection::Interface::Activated();
 };
 
 void UsbConnectionBase::Deactivated() 
 {
     m_Device->deleteProperty(TicSerialNumberTP.name);
+
+    //Connection::Interface::Deactivated();
 };
 
 bool UsbConnectionBase::saveConfigItems(FILE *fp) {

@@ -16,10 +16,120 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
-#include "PololuUsbConnectionMediator.h"
+#include "PololuUsbInterface.h"
 #include <tic.h>
 #include <cstring>
 
+/*
+class TicErrorWrapper {
+    tic_error* error;
+public:
+    TicErrorWrapper(): error(nullptr)   {}
+    ~TicErrorWrapper() { this = (tic_error*)nullptr; }
+
+    tic_error* operator=(tic_error*) { if (error) tic_error_free(error); return error = e; }
+    operator bool()                     { return error; }
+};*/
+
+bool PololuUsbInterface::energize()
+{
+    tic_error* err = tic_energize(handle);
+    if (err) {
+        lastErrorMsg = tic_error_get_message(err);
+        tic_error_free(err);
+        return false;
+    }
+    lastErrorMsg = "OK";
+
+	return true;
+}
+
+bool PololuUsbInterface::deenergize()
+{
+    tic_error* err = tic_deenergize(handle);
+    if (err) {
+        lastErrorMsg = tic_error_get_message(err);
+        tic_error_free(err);
+        return false;
+    }
+    lastErrorMsg = "OK";
+    
+    return true;
+
+}
+
+bool PololuUsbInterface::exitSafeStart()
+{
+    tic_error* err = tic_exit_safe_start(handle);
+    if (err) {
+        lastErrorMsg = tic_error_get_message(err);
+        tic_error_free(err);
+        return false;
+    }
+    lastErrorMsg = "OK";
+    
+    return true;
+}
+
+bool PololuUsbInterface::haltAndHold()
+{
+    tic_error* err = tic_halt_and_hold(handle);
+    if (err) {
+        lastErrorMsg = tic_error_get_message(err);
+        tic_error_free(err);
+        return false;
+    }
+    lastErrorMsg = "OK";
+    
+    return true;
+}
+
+bool PololuUsbInterface::setTargetPosition(int position)
+{
+    tic_error* err = tic_set_target_position(handle, position);
+    if (err) {
+        lastErrorMsg = tic_error_get_message(err);
+        tic_error_free(err);
+        return false;
+    }
+    lastErrorMsg = "OK";
+    
+    return true;
+}
+
+bool PololuUsbInterface::haltAndSetPosition(int position)
+{
+    tic_error* err = tic_halt_and_set_position(handle, position);
+    if (err) {
+        lastErrorMsg = tic_error_get_message(err);
+        tic_error_free(err);
+        return false;
+    }
+    lastErrorMsg = "OK";
+    
+    return true;
+}
+
+bool PololuUsbInterface::getVariables(TicVariables* vars)
+{
+    tic_variables* variables = NULL;
+
+    tic_error* err  = tic_get_variables(handle,&variables,false);
+    if (err) {
+        lastErrorMsg = tic_error_get_message(err);
+        tic_error_free(err);
+        return false;
+    }
+    lastErrorMsg = "OK";
+
+    vars->currentPosition = tic_variables_get_current_position(variables);
+    vars->targetPosition = tic_variables_get_target_position(variables);
+
+    tic_variables_free(variables);
+    return true;
+}
+
+#if 0
 PololuUsbConnectionMediator::TicErrorWrapper::~TicErrorWrapper() 
 {
 	if (error)
@@ -146,3 +256,4 @@ const char* PololuUsbConnectionMediator::getSerialNumber()
 {
     return serialNumber.c_str();
 }
+#endif

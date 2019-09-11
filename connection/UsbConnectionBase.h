@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <connectionplugins/connectioninterface.h>
 #include "TicConnectionInterface.h"
 
-class TicMediatorInterface;
+class TicDriverInterface;
 
 class UsbConnectionBase:
     public Connection::Interface,
@@ -42,7 +42,7 @@ class UsbConnectionBase:
 
         bool saveConfigItems(FILE *fp);
 
-        TicMediatorInterface& getTicMediator()   { return *mediator; }
+        TicDriverInterface& getTicDriverInterface()   { return *ticDriverInterface; }
         
     protected:
 
@@ -51,7 +51,7 @@ class UsbConnectionBase:
 
         std::string requiredSerialNumber;
 
-        TicMediatorInterface* mediator;
+        TicDriverInterface* ticDriverInterface;
 };
 
 #endif // USBCONNECTIONBASE_H

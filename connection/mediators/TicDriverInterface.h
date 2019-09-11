@@ -16,34 +16,33 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
-#include "BluetoothConnectionMediator.h"
-#include "ticlib/TicBluetooth.h"
+#ifndef TICDRIVERINTERFACE_H
+#define TICDRIVERINTERFACE_H
 
-#error
-
-BluetoothConnectionMediator::BluetoothConnectionMediator()
+class TicDriverInterface
 {
-    ticBase = new TicBluetooth();
-}
+public:
 
-BluetoothConnectionMediator::~BluetoothConnectionMediator() 
-{
-    delete ticBase;
-}
+	virtual ~TicDriverInterface() {}
 
-bool BluetoothConnectionMediator::connect(const char* btMacAddress)
-{
-    static_cast<TicBluetooth*>(ticBase)->connect(btMacAddress);
-    return !ticBase->getLastError();
-}
+	virtual bool energize() = 0;
+	virtual bool deenergize() = 0;
 
-bool BluetoothConnectionMediator::disconnect()
-{
-	static_cast<TicBluetooth*>(ticBase)->disconnect();
-    return true;
-}
+	virtual bool exitSafeStart() = 0;
+	virtual bool haltAndHold() = 0;
 
-const char* BluetoothConnectionMediator::getLastErrorMsg()
-{
-    return static_cast<TicBluetooth*>(ticBase)->getLastErrorMsg();
-}
+	virtual bool setTargetPosition(int position) = 0;
+	virtual bool haltAndSetPosition(int position) = 0;
+
+	class TicVariables {
+	public:
+		int currentPosition;
+		int targetPosition;
+	};
+
+	virtual bool getVariables(TicVariables*) = 0;
+
+	virtual const char* getLastErrorMsg() = 0;
+};
+
+#endif // TICDRIVERINTERFACE_H
