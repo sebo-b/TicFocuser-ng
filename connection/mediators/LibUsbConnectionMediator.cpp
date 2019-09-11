@@ -16,36 +16,40 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
-#ifndef TICUSB_H
-#define TICUSB_H
+#include "LibUsbConnectionMediator.h"
+#include <cstring>
 
-#include "TicBase.h"
-#include <string>
+#include "tic/TicUsb.h"
 
-struct libusb_device_handle;
-struct libusb_context;
 
-class TicUsb: public TicBase {
+LibUsbConnectionMediator::LibUsbConnectionMediator()
+{
+    ticBase = new TicUsb();
+}
 
-	libusb_device_handle *handle;
-	libusb_context *context;
-	std::string serialNumber;
+LibUsbConnectionMediator::~LibUsbConnectionMediator() 
+{
+    delete ticBase;
+}
 
-public:
+bool LibUsbConnectionMediator::connect(const char* requiredSerialNumber)
+{
+    static_cast<TicUsb*>(ticBase)->connect(requiredSerialNumber);
+    return !ticBase->getLastError();
+}
 
-	TicUsb();
-	~TicUsb();
+bool LibUsbConnectionMediator::disconnect()
+{
+	static_cast<TicUsb*>(ticBase)->disconnect();
+    return true;
+}
 
-	void connect(const char* serialNo);
-	void disconnect();
-	const char* getSerial()	{ return serialNumber.c_str(); }
+const char* LibUsbConnectionMediator::getLastErrorMsg()
+{
+    return static_cast<TicUsb*>(ticBase)->getLastErrorMsg();
+}
 
-	void commandQuick(TicCommand cmd);
-	void commandW32(TicCommand cmd, uint32_t val);
-	void commandW7(TicCommand cmd, uint8_t val);
-	void getSegment(TicCommand cmd, uint8_t offset, uint8_t length, void * buffer);
-
-	const char* getLastErrorMsg();
-};
-
-#endif // TICUSB_H
+const char* LibUsbConnectionMediator::getSerialNumber()
+{
+	return static_cast<TicUsb*>(ticBase)->getSerial();
+}

@@ -32,16 +32,34 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 static const size_t MAX_SERIAL_NUMBER = 20; // serial number has 8 characters, 20 is super safe
 
-TicUsb::TicUsb(const char* serialNo):
+TicUsb::TicUsb():
   handle(NULL), context(NULL)
 {
-
   _lastError = libusb_init(&context);
-  if (_lastError)
+}
+
+TicUsb::~TicUsb() 
+{
+  disconnect();
+  
+  if (context)
+    libusb_exit(context);
+
+  context = NULL;
+}
+
+#include <indilogger.h>
+
+void TicUsb::connect(const char* serialNo)
+{
+  if (!context)
     return;
 
+//  INDI::Logger::getInstance().print("TIC Focuser NG",INDI::Logger::DBG_WARNING, __FILE__, __LINE__,"jest context");
+  disconnect();
+
   libusb_device** devs = NULL;
-  _lastError = libusb_get_device_list(NULL, &devs);
+  _lastError = libusb_get_device_list(context, &devs);
   if (_lastError <= 0)
     return;
   
@@ -52,9 +70,9 @@ TicUsb::TicUsb(const char* serialNo):
 
   for (; *dev != NULL; ++dev) 
   {
-    struct libusb_device_descriptor desc;
+    libusb_device_descriptor desc;
     _lastError = libusb_get_device_descriptor(*dev, &desc);
-    if (!_lastError)
+    if (_lastError)
       break;
 
     if (desc.idVendor != TIC_VENDOR_ID ||
@@ -70,7 +88,7 @@ TicUsb::TicUsb(const char* serialNo):
       continue;
 
     _lastError = libusb_open(*dev, &handle);
-    if (!_lastError) 
+    if (_lastError) 
     {
       handle = NULL;
       break;
@@ -84,6 +102,7 @@ TicUsb::TicUsb(const char* serialNo):
         (serialNoLen == 0 || 
           (serialLen == serialNoLen && !strncmp(serialNo,(char*)devSerial,serialLen))) ) 
     {
+      serialNumber = (const char*)devSerial;
       break;
     }
 
@@ -101,16 +120,13 @@ TicUsb::TicUsb(const char* serialNo):
     _lastError = LIBUSB_ERROR_NO_DEVICE;
 }
 
-TicUsb::~TicUsb() 
+void TicUsb::disconnect()
 {
   if (handle)
     libusb_close(handle);
-
-  if (context)
-    libusb_exit(context);
-
-  context = NULL;
+  
   handle = NULL;
+  serialNumber.clear();
 }
 
 void TicUsb::commandQuick(TicCommand cmd)  
@@ -143,4 +159,9 @@ void TicUsb::getSegment(TicCommand cmd, uint8_t offset, uint8_t length, void * b
     _lastError = LIBUSB_ERROR_OTHER;
   else
     _lastError = 0;
+}
+
+const char* TicUsb::getLastErrorMsg()
+{
+  return libusb_error_name( _lastError);
 }

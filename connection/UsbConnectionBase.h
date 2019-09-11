@@ -16,23 +16,41 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
-#ifndef POLOLUUSBCONNECTION_H
-#define POLOLUUSBCONNECTION_H
+#ifndef USBCONNECTIONBASE_H
+#define USBCONNECTIONBASE_H
 
 #include <connectionplugins/connectioninterface.h>
-#include "UsbConnectionBase.h"
+#include "TicConnectionInterface.h"
 
-class PololuUsbConnection: public UsbConnectionBase
+class TicMediator;
+
+class UsbConnectionBase:
+    public Connection::Interface,
+    public TicConnectionInterface
 {
     public:
 
-        PololuUsbConnection(INDI::DefaultDevice *dev);
-        ~PololuUsbConnection();
+        UsbConnectionBase(INDI::DefaultDevice *dev);
+        ~UsbConnectionBase();
         
-        bool Connect();
+        bool Disconnect();
+        void Activated();
+        void Deactivated();
 
-        std::string name() { return "Pololu USB Connection"; };
-        std::string label() { return "PololuUSB"; };
+        bool ISNewText(const char *dev, const char *name, char *texts[], char *names[], int n);
+
+        bool saveConfigItems(FILE *fp);
+
+        TicMediator& getTicMediator()   { return *mediator; }
+        
+    protected:
+
+        IText TicSerialNumberT[1] {};
+        ITextVectorProperty TicSerialNumberTP;
+
+        std::string requiredSerialNumber;
+
+        TicMediator* mediator;
 };
 
-#endif // POLOLUUSBCONNECTION_H
+#endif // USBCONNECTIONBASE_H

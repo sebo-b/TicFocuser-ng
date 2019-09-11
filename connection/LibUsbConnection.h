@@ -16,36 +16,23 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
-#ifndef TICUSB_H
-#define TICUSB_H
+#ifndef LIBUSBCONNECTION_H
+#define LIBUSBCONNECTION_H
 
-#include "TicBase.h"
-#include <string>
+#include <connectionplugins/connectioninterface.h>
+#include "UsbConnectionBase.h"
 
-struct libusb_device_handle;
-struct libusb_context;
+class LibUsbConnection: public UsbConnectionBase
+{
+    public:
 
-class TicUsb: public TicBase {
+        LibUsbConnection(INDI::DefaultDevice *dev);
+        ~LibUsbConnection();
+        
+        bool Connect();
 
-	libusb_device_handle *handle;
-	libusb_context *context;
-	std::string serialNumber;
-
-public:
-
-	TicUsb();
-	~TicUsb();
-
-	void connect(const char* serialNo);
-	void disconnect();
-	const char* getSerial()	{ return serialNumber.c_str(); }
-
-	void commandQuick(TicCommand cmd);
-	void commandW32(TicCommand cmd, uint32_t val);
-	void commandW7(TicCommand cmd, uint8_t val);
-	void getSegment(TicCommand cmd, uint8_t offset, uint8_t length, void * buffer);
-
-	const char* getLastErrorMsg();
+        std::string name() { return "Lib USB Connection"; };
+        std::string label() { return "LibUSB"; };
 };
 
-#endif // TICUSB_H
+#endif // LIBUSBCONNECTION_H

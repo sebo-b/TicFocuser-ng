@@ -16,36 +16,26 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
-#ifndef TICUSB_H
-#define TICUSB_H
+#ifndef LIBUSBCONNECTIONMEDIATOR_H
+#define LIBUSBCONNECTIONMEDIATOR_H
 
-#include "TicBase.h"
+#include "TicBaseConnectionMediator.h"
 #include <string>
 
-struct libusb_device_handle;
-struct libusb_context;
 
-class TicUsb: public TicBase {
-
-	libusb_device_handle *handle;
-	libusb_context *context;
-	std::string serialNumber;
-
+class LibUsbConnectionMediator: public TicBaseConnectionMediator
+{
 public:
 
-	TicUsb();
-	~TicUsb();
+	LibUsbConnectionMediator();
+    ~LibUsbConnectionMediator();
 
-	void connect(const char* serialNo);
-	void disconnect();
-	const char* getSerial()	{ return serialNumber.c_str(); }
+    bool connect()  { return connect(nullptr); }
+    bool connect(const char* serialNumber);
+    bool disconnect();
 
-	void commandQuick(TicCommand cmd);
-	void commandW32(TicCommand cmd, uint32_t val);
-	void commandW7(TicCommand cmd, uint8_t val);
-	void getSegment(TicCommand cmd, uint8_t offset, uint8_t length, void * buffer);
-
-	const char* getLastErrorMsg();
+    const char* getLastErrorMsg();
+    const char* getSerialNumber();
 };
 
-#endif // TICUSB_H
+#endif // LIBUSBCONNECTIONMEDIATOR_H

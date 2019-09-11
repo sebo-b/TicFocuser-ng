@@ -29,8 +29,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "TicFocuser.h"
 #include "connection/PololuUsbConnection.h"
+#include "connection/LibUsbConnection.h"
 
 #include "TicFocuser_config.h"
+
+//#include <indilogger.h>
+//INDI::Logger::getInstance().print("TIC Focuser NG",INDI::Logger::DBG_WARNING, __FILE__, __LINE__,"jest context");
+
 
 std::unique_ptr<TicFocuser> ticFocuser(new TicFocuser());
 
@@ -98,6 +103,9 @@ bool TicFocuser::initProperties()
 
     PololuUsbConnection* pololuUsbC = new PololuUsbConnection(this);
     registerConnection(pololuUsbC);
+
+    LibUsbConnection* libUsbC = new LibUsbConnection(this);
+    registerConnection(libUsbC);
 
     return true;
 }

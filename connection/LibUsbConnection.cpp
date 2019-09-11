@@ -16,28 +16,28 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
-#include "PololuUsbConnection.h"
+#include "LibUsbConnection.h"
 
-#include "mediators/PololuUsbConnectionMediator.h"
+#include "mediators/LibUsbConnectionMediator.h"
 #include <string.h>
 
 #include <indilogger.h>
 #include <tic.h>
 
-PololuUsbConnection::PololuUsbConnection(INDI::DefaultDevice *dev):
+LibUsbConnection::LibUsbConnection(INDI::DefaultDevice *dev):
     UsbConnectionBase(dev)
 {
-    mediator = new PololuUsbConnectionMediator();
+    mediator = new LibUsbConnectionMediator();
 };
 
-PololuUsbConnection::~PololuUsbConnection() 
+LibUsbConnection::~LibUsbConnection() 
 {
     delete mediator;
 };
 
-bool PololuUsbConnection::Connect() 
+bool LibUsbConnection::Connect() 
 { 
-    PololuUsbConnectionMediator* usbMediator = static_cast<PololuUsbConnectionMediator*>(mediator);
+    LibUsbConnectionMediator* usbMediator = static_cast<LibUsbConnectionMediator*>(mediator);
     
     if (!usbMediator->connect( requiredSerialNumber.c_str() )) 
     {

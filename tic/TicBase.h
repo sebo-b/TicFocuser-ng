@@ -294,6 +294,9 @@ enum class TicMotorDriverError
 class TicBase
 {
 public:
+
+  virtual ~TicBase() {}
+
   /// You can use this function to specify what type of Tic you are using.
   ///
   /// Example usage (pick one of the following):
