@@ -85,6 +85,24 @@ size_t StreamBT::write(uint8_t byte)
 
 size_t StreamBT::readBytes(char *buffer, size_t length)
 {
-  return ::read(btSocket, buffer, length);
+  size_t readC = 0;
+  int numZeros = 0; // safety counter, if we read 5x0 in a row, we eject
+
+  // try to read until we receive enough bytes
+  while (readC < length && numZeros < 5) {
+
+    if (readC > 0)
+      usleep(10);
+    
+    size_t c = ::read(btSocket, buffer + readC, length - readC);
+    readC += c;
+
+    if (c == 0)
+      ++numZeros;
+    else
+      numZeros = 0;
+  }
+
+  return readC;
 }
 

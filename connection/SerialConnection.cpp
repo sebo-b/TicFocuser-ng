@@ -16,36 +16,20 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
-#include "BluetoothConnection.h"
+#include "SerialConnection.h"
 
 #include "driver_interfaces/TiclibInterface.h"
 #include "ticlib/TicBase.h"
-#include "ticlib/StreamBT.h"
+#include "ticlib/StreamSerial.h"
 
 #include <indilogger.h>
 #include <string.h>
 
-BluetoothConnection::BluetoothConnection(INDI::DefaultDevice *dev):
-    Interface(dev, CONNECTION_CUSTOM)
+SerialConnection::SerialConnection(INDI::DefaultDevice *dev):
+    Connection::Serial(dev)
 {
-    const size_t MAX_BT_MAC = 40; // bt mac has 17 characters, 40 is super safe
-    char btMacAddress[MAX_BT_MAC];    
-
-    if (IUGetConfigText(dev->getDeviceName(), "BT_MAC_TP", "BT_MAC_ADDRESS", btMacAddress, MAX_BT_MAC)) {
-        btMacAddress[0] = '\0';
-    }
-    else {
-    	requiredBtMacAddress = btMacAddress;
-    }
-
-    IUFillText(BtMacAddressT, "BT_MAC_ADDRESS", "Bluetooth MAC address", btMacAddress);
-    IUFillTextVector(&BtMacAddressTP, BtMacAddressT, 1, getDeviceName(), "BT_MAC_TP", "Bluetooth MAC address", CONNECTION_TAB,
-                     IP_RW, 60, IPS_IDLE);
-    LOG_WARN("IUFillText in BluetoothConnection");
-
-    streamBT = new StreamBT;
-    ticSerial = new TicSerial(*streamBT);
-
+    streamSerial = new StreamSerial(PortFD);
+    ticSerial = new TicSerial(*streamSerial);
     ticDriverInterface = new  TiclibInterface(*ticSerial);
 
     registerHandshake([&]()
@@ -54,36 +38,35 @@ BluetoothConnection::BluetoothConnection(INDI::DefaultDevice *dev):
     });
 }
 
-BluetoothConnection::~BluetoothConnection() 
+SerialConnection::~SerialConnection() 
 {
-    delete ticDriverInterface;
-    delete ticSerial;
-    delete streamBT;
+//    delete ticDriverInterface;
+//    delete ticSerial;
+//    delete streamBT;
 }
 
-bool BluetoothConnection::Connect()
+bool SerialConnection::callHandshake()
 {
-    if (!streamBT->connect(requiredBtMacAddress.c_str()))
-    {
-        LOGF_ERROR("Cannot connect to bluetooth device with MAC address %s", requiredBtMacAddress.c_str());
-        return false;
-    }
-
-    if (!Handshake())
-    {
-        LOG_ERROR("Bluetooth device handshake failed.");
-        streamBT->disconnect();
-        return false;
-    }
-
-    LOGF_INFO("Connected to Bluetooth device with MAC: %s",requiredBtMacAddress.c_str());
-
-    BtMacAddressTP.s = IPS_OK;
-    IUSaveText(BtMacAddressT, requiredBtMacAddress.c_str());
-    IDSetText(&BtMacAddressTP, nullptr);
-
-    return true;
+    uint32_t uptime = ticSerial->getUpTime();
+    return !ticSerial->getLastError() && uptime > 0;
 }
+
+#if 0
+
+bool SerialConnection::Connect()
+{
+    bool res = Connection::Serial::Connect();
+
+    if (res)
+    {
+        streamSerial->connect(PortFD);
+//
+
+    }
+    
+    return res;
+}
+
 
 bool BluetoothConnection::Disconnect() 
 { 
@@ -91,12 +74,6 @@ bool BluetoothConnection::Disconnect()
 
     LOG_INFO("Bluetooth disconnected.");
     return true;
-}
-
-bool BluetoothConnection::callHandshake()
-{
-    uint32_t uptime = ticSerial->getUpTime();
-    return !ticSerial->getLastError() && uptime > 0;
 }
 
 void BluetoothConnection::Activated() 
@@ -163,3 +140,5 @@ bool BluetoothConnection::ISNewText(const char *dev, const char *name, char *tex
 
     return Connection::Interface::ISNewText(dev,name,texts,names,n);
 }
+
+#endif

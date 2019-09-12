@@ -23,17 +23,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <cstring>
 
-/*
-class TicErrorWrapper {
-    tic_error* error;
-public:
-    TicErrorWrapper(): error(nullptr)   {}
-    ~TicErrorWrapper() { this = (tic_error*)nullptr; }
-
-    tic_error* operator=(tic_error*) { if (error) tic_error_free(error); return error = e; }
-    operator bool()                     { return error; }
-};*/
-
 bool TiclibInterface::energize()
 {
     ticBase.energize();

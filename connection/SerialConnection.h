@@ -16,34 +16,33 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
-#ifndef BLUETOOTHCONNECTION_H
-#define BLUETOOTHCONNECTION_H
+#ifndef SERIALCONNECTION_H
+#define SERIALCONNECTION_H
 
-#include <connectionplugins/connectioninterface.h>
+#include <connectionplugins/connectionserial.h>
 #include "TicConnectionInterface.h"
 
-class StreamBT;
+class StreamSerial;
 class TicSerial;
 
-class BluetoothConnection:
-    public Connection::Interface,
+class SerialConnection:
+    public Connection::Serial,
     public TicConnectionInterface
 {
     public:
 
-        BluetoothConnection(INDI::DefaultDevice *dev);
-        ~BluetoothConnection();
+        SerialConnection(INDI::DefaultDevice *dev);
+        ~SerialConnection();
 
-        std::string name() { return "Tic Bluetooth Connection"; };
-        std::string label() { return "Bluetooth"; };
+        std::string name() { return "Tic Serial Connection"; };
      
-        bool Connect();
-        bool Disconnect();
-        void Activated();
-        void Deactivated();
-
-        bool ISNewText(const char *dev, const char *name, char *texts[], char *names[], int n);
-        bool saveConfigItems(FILE *fp);
+//        bool Connect();
+//        bool Disconnect();
+//        void Activated();
+//        void Deactivated();
+//
+//        bool ISNewText(const char *dev, const char *name, char *texts[], char *names[], int n);
+//        bool saveConfigItems(FILE *fp);
 
         TicDriverInterface& getTicDriverInterface()   { return *ticDriverInterface; }
         
@@ -51,15 +50,9 @@ class BluetoothConnection:
 
         bool callHandshake();
 
-        IText BtMacAddressT[1] {};
-        ITextVectorProperty BtMacAddressTP;
-
-        std::string requiredBtMacAddress;
-
         TicDriverInterface* ticDriverInterface;
-
-        StreamBT* streamBT;
+        StreamSerial* streamSerial;
         TicSerial* ticSerial;
 };
 
-#endif // BLUETOOTHCONNECTION_H
+#endif // SERIALCONNECTION_H

@@ -7,8 +7,8 @@ endif(COMMAND cmake_policy)
 PROJECT(TicFocuserNG CXX)
 #include(ExternalProject)
 
-set (TICFOCUSER_VERSION_MAJOR 0)
-set (TICFOCUSER_VERSION_MINOR 9)
+set (TICFOCUSER_VERSION_MAJOR 1)
+set (TICFOCUSER_VERSION_MINOR 0)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/TicFocuser_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/TicFocuser_config.h)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/indi_ticfocuser-ng.xml.in ${CMAKE_CURRENT_BINARY_DIR}/indi_ticfocuser-ng.xml)
@@ -50,6 +50,7 @@ set(indi_ticfocuser-ng_SRCS
         ${CMAKE_CURRENT_SOURCE_DIR}/connection/PololuUsbConnection.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/connection/LibUsbConnection.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/connection/BluetoothConnection.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/connection/SerialConnection.cpp
 
         ${CMAKE_CURRENT_SOURCE_DIR}/connection/driver_interfaces/PololuUsbInterface.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/connection/driver_interfaces/TiclibInterface.cpp
@@ -58,7 +59,7 @@ set(indi_ticfocuser-ng_SRCS
         ${CMAKE_CURRENT_SOURCE_DIR}/connection/ticlib/TicDefs.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/connection/ticlib/TicUsb.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/connection/ticlib/StreamBT.cpp
-#        ${CMAKE_CURRENT_SOURCE_DIR}/connection/ticlib/StreamSerial.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/connection/ticlib/StreamSerial.cpp
     )
 
 add_executable(indi_ticfocuser-ng ${indi_ticfocuser-ng_SRCS})

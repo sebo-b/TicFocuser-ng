@@ -31,6 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "connection/PololuUsbConnection.h"
 #include "connection/LibUsbConnection.h"
 #include "connection/BluetoothConnection.h"
+#include "connection/SerialConnection.h"
 
 #include "connection/ticlib/TicDefs.h"
 
@@ -107,15 +108,6 @@ bool TicFocuser::initProperties()
     IUFillSwitch(&EnergizeFocuserS[1],"DEENERGIZE_FOCUSER","De-energize focuser",ISS_OFF);
     IUFillSwitchVector(&EnergizeFocuserSP,EnergizeFocuserS,2,getDeviceName(),"ENERGIZE_FOCUSER","Energize",MAIN_CONTROL_TAB,IP_RW,ISR_1OFMANY,60,IPS_IDLE);
 
-    PololuUsbConnection* pololuUsbC = new PololuUsbConnection(this);
-    registerConnection(pololuUsbC);
-
-    LibUsbConnection* libUsbC = new LibUsbConnection(this);
-    registerConnection(libUsbC);
-
-    BluetoothConnection* bluetoothC = new BluetoothConnection(this);
-    registerConnection(bluetoothC);
-
     /***** INFO_TAB */
     IUFillText(&InfoS[VIN_VOLTAGE], "VIN_VOLTAGE", "Vin voltage", "");
     IUFillText(&InfoS[CURRENT_LIMIT], "CURRENT_LIMIT", "Currnet limit", "");
@@ -128,6 +120,12 @@ bool TicFocuser::initProperties()
     for (size_t i = 0; i < tic_error_names_ui_size; ++i)
         IUFillText(&InfoErrorS[i], tic_error_names_ui[i].name, tic_error_names_ui[i].name, "");
     IUFillTextVector(&InfoErrorSP, InfoErrorS, tic_error_names_ui_size, getDeviceName(), "TIC_INFO_ERROR", "Tic Error", INFO_TAB, IP_RO, 60, IPS_IDLE);
+
+    /***** Connections */
+    registerConnection(new PololuUsbConnection(this));
+    registerConnection(new LibUsbConnection(this));
+    registerConnection(new BluetoothConnection(this));
+    registerConnection(new SerialConnection(this));
 
     return true;
 }

@@ -29,27 +29,6 @@ OTHER DEALINGS IN THE SOFTWARE.
 #include <unistd.h>
 
 
-StreamSerial::StreamSerial():
-	fd(-1)
-{
-}
-
-StreamSerial::~StreamSerial()
-{
-	disconnect();
-}
-
-bool StreamSerial::connect(int fd)
-{
-  StreamSerial::fd = fd;
-  return true;
-}
-
-void StreamSerial::disconnect()
-{
-	fd = -1;
-}
-
 size_t StreamSerial::write(uint8_t byte)
 {
   return ::write(fd,&byte,sizeof(byte));
@@ -57,6 +36,34 @@ size_t StreamSerial::write(uint8_t byte)
 
 size_t StreamSerial::readBytes(char *buffer, size_t length)
 {
-  return ::read(fd, buffer, length);
+	size_t readC = 0;
+	int numZeros = 0;	// safety counter, if we read 5x0 in a row, we eject
+
+	// try to read until we receive enough bytes
+	while (readC < length && numZeros < 5) {
+
+		if (readC > 0)
+			usleep(10);
+		
+		size_t c = ::read(fd, buffer + readC, length - readC);
+		readC += c;
+
+		if (c == 0)
+			++numZeros;
+		else
+			numZeros = 0;
+	}
+
+  return readC;
 }
+
+
+
+
+
+
+
+
+
+
 

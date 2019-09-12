@@ -27,19 +27,17 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
+#include "Stream.h"
+
 #include <cstddef>
 #include <cstdint>
 
-class StreamSerial
+class StreamSerial: public Stream
 {
-	int fd;
+	const int& fd;
 
 public:
-	StreamSerial();
-	~StreamSerial();
-
-	bool connect(int fd);
-	void disconnect();
+	StreamSerial(const int& fd): fd( fd)	{}
 
 	size_t write(uint8_t byte);
     size_t readBytes(char *buffer, size_t length);
