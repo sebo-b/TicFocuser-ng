@@ -55,6 +55,7 @@ set(indi_ticfocuser-ng_SRCS
         ${CMAKE_CURRENT_SOURCE_DIR}/connection/driver_interfaces/TiclibInterface.cpp
 
         ${CMAKE_CURRENT_SOURCE_DIR}/connection/ticlib/TicBase.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/connection/ticlib/TicDefs.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/connection/ticlib/TicUsb.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/connection/ticlib/StreamBT.cpp
 #        ${CMAKE_CURRENT_SOURCE_DIR}/connection/ticlib/StreamSerial.cpp

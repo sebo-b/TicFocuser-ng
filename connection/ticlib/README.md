@@ -1,5 +1,6 @@
 
 This is a modified [tic-arduino](https://github.com/pololu/tic-arduino) library.
+Two files: tic_internal.h and tic_names.c are copied from (tic-usb library)[https://github.com/pololu/pololu-tic-software].
 
 Goals:
 - make it work on Linux,

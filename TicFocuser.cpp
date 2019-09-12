@@ -32,6 +32,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "connection/LibUsbConnection.h"
 #include "connection/BluetoothConnection.h"
 
+#include "connection/ticlib/TicDefs.h"
+
 #include "TicFocuser_config.h"
 
 //#include <indilogger.h>
@@ -84,10 +86,13 @@ TicFocuser::TicFocuser():
     setVersion(TICFOCUSER_VERSION_MAJOR,TICFOCUSER_VERSION_MINOR);
     setSupportedConnections(CONNECTION_NONE);
     FI::SetCapability(FOCUSER_CAN_ABS_MOVE | FOCUSER_CAN_REL_MOVE | FOCUSER_CAN_SYNC | FOCUSER_CAN_ABORT );
+
+    InfoErrorS = new IText[tic_error_names_ui_size];
 }
 
 TicFocuser::~TicFocuser()
 {
+    delete [] InfoErrorS;
 }
 
 bool TicFocuser::initProperties()
@@ -111,8 +116,18 @@ bool TicFocuser::initProperties()
     BluetoothConnection* bluetoothC = new BluetoothConnection(this);
     registerConnection(bluetoothC);
 
-//INFO_TAB
+    /***** INFO_TAB */
+    IUFillText(&InfoS[VIN_VOLTAGE], "VIN_VOLTAGE", "Vin voltage", "");
+    IUFillText(&InfoS[CURRENT_LIMIT], "CURRENT_LIMIT", "Currnet limit", "");
+    IUFillText(&InfoS[STEP_MODE], "STEP_MODE", "Step mode", "");
+    IUFillText(&InfoS[ENERGIZED], "ENERGIZED", "Energized", "");
+    IUFillText(&InfoS[OPERATION_STATE], "OPERATION_STATE", "Operational state", "");
+    IUFillTextVector(&InfoSP, InfoS, InfoTabSize, getDeviceName(), "TIC_INFO", "Tic Info", INFO_TAB, IP_RO, 60, IPS_IDLE);
 
+    /***** INFO_TAB > Error */
+    for (size_t i = 0; i < tic_error_names_ui_size; ++i)
+        IUFillText(&InfoErrorS[i], tic_error_names_ui[i].name, tic_error_names_ui[i].name, "");
+    IUFillTextVector(&InfoErrorSP, InfoErrorS, tic_error_names_ui_size, getDeviceName(), "TIC_INFO_ERROR", "Tic Error", INFO_TAB, IP_RO, 60, IPS_IDLE);
 
     return true;
 }
@@ -125,11 +140,15 @@ bool TicFocuser::updateProperties()
     {
         defineSwitch(&EnergizeFocuserSP);
         defineSwitch(&FocusParkingModeSP);
+        defineText(&InfoSP);
+        defineText(&InfoErrorSP);
     }
     else
     {
         deleteProperty(FocusParkingModeSP.name);
         deleteProperty(EnergizeFocuserSP.name);
+        deleteProperty(InfoSP.name);
+        deleteProperty(InfoErrorSP.name);
     }
 
     return true;
@@ -214,12 +233,13 @@ void TicFocuser::TimerHit()
         return;
 
     TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
-    TicDriverInterface& mediator = conn->getTicDriverInterface();
+    TicDriverInterface& driverInterface = conn->getTicDriverInterface();
 
     TicDriverInterface::TicVariables ticVariables;
-    bool res = mediator.getVariables(&ticVariables);
+    bool res = driverInterface.getVariables(&ticVariables);
 
     if (res) {
+
         lastTimerHitError = false;
 
         FocusAbsPosN[0].value = ticVariables.currentPosition;
@@ -242,9 +262,34 @@ void TicFocuser::TimerHit()
         IDSetNumber(&FocusRelPosNP, nullptr);
         IDSetNumber(&FocusSyncNP, nullptr);
 
+        /** INFO_TAB */
+        char buf[20];
+        std::snprintf(buf,sizeof(buf),"%.2f V", ((double)ticVariables.vinVoltage)/1000);
+        IUSaveText( &InfoS[VIN_VOLTAGE], buf);
+        if (ticVariables.currentLimit > 1000)
+            std::snprintf(buf,sizeof(buf),"%.2f A", ((double)ticVariables.currentLimit)/1000);
+        else
+            std::snprintf(buf,sizeof(buf),"%d mA", ticVariables.currentLimit);
+
+        IUSaveText( &InfoS[CURRENT_LIMIT], buf);
+        IUSaveText( &InfoS[ENERGIZED], ticVariables.energized? "Yes": "No");
+        IUSaveText( &InfoS[STEP_MODE], ticVariables.stepMode.c_str());
+        IUSaveText( &InfoS[OPERATION_STATE], ticVariables.operationalState.c_str());
+        IDSetText(&InfoSP, nullptr);
+
+        /***** INFO_TAB > Error */
+        for (size_t i = 0; i < tic_error_names_ui_size; ++i) 
+        {
+            if (tic_error_names_ui[i].code & ticVariables.errorStatus)
+                IUSaveText(&InfoErrorS[i], "Error");
+            else
+                IUSaveText(&InfoErrorS[i], "-");
+        }
+        IDSetText(&InfoErrorSP, nullptr);
+
     }
     else if (!lastTimerHitError) {
-        LOGF_ERROR("Cannot receive variables: %s", mediator.getLastErrorMsg());
+        LOGF_ERROR("Cannot receive variables: %s", driverInterface.getLastErrorMsg());
         lastTimerHitError = true;
     }
 
@@ -254,18 +299,18 @@ void TicFocuser::TimerHit()
 bool TicFocuser::energizeFocuser()
 {
     TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
-    TicDriverInterface& mediator = conn->getTicDriverInterface();
+    TicDriverInterface& driverInterface = conn->getTicDriverInterface();
 
-    if (!mediator.energize()) 
+    if (!driverInterface.energize()) 
     {
-        LOGF_ERROR("Cannot energize motor. Error: %s", mediator.getLastErrorMsg());
+        LOGF_ERROR("Cannot energize motor. Error: %s", driverInterface.getLastErrorMsg());
         return false;
     }
 
 
-    if (!mediator.exitSafeStart())
+    if (!driverInterface.exitSafeStart())
     {
-        LOGF_ERROR("Cannot exit safe start. Error: %s", mediator.getLastErrorMsg());
+        LOGF_ERROR("Cannot exit safe start. Error: %s", driverInterface.getLastErrorMsg());
         return false;
     }
 
@@ -275,11 +320,11 @@ bool TicFocuser::energizeFocuser()
 bool TicFocuser::deenergizeFocuser()
 {
     TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
-    TicDriverInterface& mediator = conn->getTicDriverInterface();
+    TicDriverInterface& driverInterface = conn->getTicDriverInterface();
 
-    if (!mediator.deenergize())
+    if (!driverInterface.deenergize())
     {
-        LOGF_ERROR("Cannot de-energize motor. Error: %s", mediator.getLastErrorMsg());
+        LOGF_ERROR("Cannot de-energize motor. Error: %s", driverInterface.getLastErrorMsg());
         return false;
     }
     else
@@ -293,11 +338,11 @@ bool TicFocuser::deenergizeFocuser()
 bool TicFocuser::SyncFocuser(uint32_t ticks) 
 {
     TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
-    TicDriverInterface& mediator = conn->getTicDriverInterface();
+    TicDriverInterface& driverInterface = conn->getTicDriverInterface();
 
-    if (!mediator.haltAndSetPosition(ticks))
+    if (!driverInterface.haltAndSetPosition(ticks))
     {
-        LOGF_ERROR("Cannot sync focuser. Error: %s", mediator.getLastErrorMsg());
+        LOGF_ERROR("Cannot sync focuser. Error: %s", driverInterface.getLastErrorMsg());
         return false;
     }
 
@@ -309,11 +354,11 @@ bool TicFocuser::AbortFocuser()
 {
 
     TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
-    TicDriverInterface& mediator = conn->getTicDriverInterface();
+    TicDriverInterface& driverInterface = conn->getTicDriverInterface();
 
-    if (!mediator.haltAndHold())
+    if (!driverInterface.haltAndHold())
     {
-        LOGF_ERROR("Cannot abort TIC. Error: %s", mediator.getLastErrorMsg());
+        LOGF_ERROR("Cannot abort TIC. Error: %s", driverInterface.getLastErrorMsg());
         return false;
     }
 
@@ -363,11 +408,11 @@ IPState TicFocuser::MoveAbsFocuser(uint32_t ticks)
     }
 
     TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
-    TicDriverInterface& mediator = conn->getTicDriverInterface();
+    TicDriverInterface& driverInterface = conn->getTicDriverInterface();
 
-    if (!mediator.setTargetPosition(ticks))
+    if (!driverInterface.setTargetPosition(ticks))
     {
-        LOGF_ERROR("Cannot set target position. Error: %s", mediator.getLastErrorMsg());
+        LOGF_ERROR("Cannot set target position. Error: %s", driverInterface.getLastErrorMsg());
         return IPS_ALERT;
     }
   

@@ -126,135 +126,16 @@ bool PololuUsbInterface::getVariables(TicVariables* vars)
     vars->currentPosition = tic_variables_get_current_position(variables);
     vars->targetPosition = tic_variables_get_target_position(variables);
 
+    vars->vinVoltage = tic_variables_get_vin_voltage(variables);
+    vars->currentLimit = tic_variables_get_current_limit(variables);
+    vars->energized = tic_variables_get_energized(variables);
+    vars->stepMode = tic_look_up_step_mode_name_ui(
+        tic_variables_get_step_mode(variables));
+    vars->operationalState = tic_look_up_operation_state_name_ui(
+        tic_variables_get_operation_state(variables));
+
+    vars->errorStatus = tic_variables_get_error_status(variables);
+
     tic_variables_free(variables);
     return true;
 }
-
-#if 0
-PololuUsbConnectionMediator::TicErrorWrapper::~TicErrorWrapper() 
-{
-	if (error)
-		tic_error_free(error);
-}
-
-tic_error* PololuUsbConnectionMediator::TicErrorWrapper::operator=(tic_error* e)
-{
-	if (error)
-		tic_error_free(error);
-	return error = e;		
-}
-
-PololuUsbConnectionMediator::PololuUsbConnectionMediator():
-	handle(NULL)
-{
-}
-
-PololuUsbConnectionMediator::~PololuUsbConnectionMediator() 
-{
-	if (handle) {
-		tic_handle_close(handle);
-		handle = NULL;
-	}
-}
-
-bool PololuUsbConnectionMediator::connect(const char* requiredSerialNumber)
-{
-    disconnect();
-
-    tic_device** deviceList;
-
-    error = tic_list_connected_devices(&deviceList,NULL);
-    if (error)
-    	return !error;
-
-    for (tic_device** d = deviceList; *d; ++d) {
-
-        const char* devSerial = tic_device_get_serial_number(*d);
-
-        if (requiredSerialNumber == NULL || !strcmp(requiredSerialNumber,"") || !strcmp(requiredSerialNumber,devSerial))
-        {   
-            error = tic_handle_open(*d,&handle);
-            if (error)
-                continue;
-
-            serialNumber = devSerial;
-            break;
-        }
-    }
-
-    for (tic_device** d = deviceList; *d; ++d)
-        tic_device_free(*d);
-    tic_list_free(deviceList);
-
-    return handle != NULL;
-}
-
-bool PololuUsbConnectionMediator::disconnect()
-{
-    if (handle)
-    	tic_handle_close(handle);
-
-    handle = NULL;
-    serialNumber.clear();
-
-    return true;
-}
-
-bool PololuUsbConnectionMediator::energize()
-{
-    return !(error = tic_energize(handle));
-}
-
-bool PololuUsbConnectionMediator::deenergize()
-{
-	return !(error = tic_energize(handle));
-}
-
-bool PololuUsbConnectionMediator::exitSafeStart()
-{
-	return !(error = tic_exit_safe_start(handle));
-}
-
-bool PololuUsbConnectionMediator::haltAndHold()
-{
-	return !(error = tic_halt_and_hold(handle));
-}
-
-bool PololuUsbConnectionMediator::setTargetPosition(int position)
-{
-	return !(error = tic_set_target_position(handle, position));
-}
-
-bool PololuUsbConnectionMediator::haltAndSetPosition(int position)
-{
-	return !(error = tic_halt_and_set_position(handle, position));
-}
-
-bool PololuUsbConnectionMediator::getVariables(TicMediatorInterface::TicVariables* vars)
-{
-    tic_variables* variables = NULL;
-
-    error = tic_get_variables(handle,&variables,false);
-    if (error)
-    	return !error;
-
-	vars->currentPosition = tic_variables_get_current_position(variables);
-	vars->targetPosition = tic_variables_get_target_position(variables);
-
-    tic_variables_free(variables);
-	return true;
-}
-
-const char* PololuUsbConnectionMediator::getLastErrorMsg()
-{
-	if (!error)
-		return NULL;
-
-	return tic_error_get_message(error);
-}
-
-const char* PololuUsbConnectionMediator::getSerialNumber()
-{
-    return serialNumber.c_str();
-}
-#endif

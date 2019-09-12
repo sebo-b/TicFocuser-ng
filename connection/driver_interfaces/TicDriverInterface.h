@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef TICDRIVERINTERFACE_H
 #define TICDRIVERINTERFACE_H
 
+#include <string>
+
 class TicDriverInterface
 {
 public:
@@ -38,6 +40,14 @@ public:
 	public:
 		int currentPosition;
 		int targetPosition;
+
+		int vinVoltage;
+		int currentLimit;
+		bool energized;
+		std::string stepMode;
+		std::string operationalState;
+
+		uint16_t errorStatus;
 	};
 
 	virtual bool getVariables(TicVariables*) = 0;
