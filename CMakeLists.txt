@@ -1,84 +1,88 @@
-cmake_minimum_required(VERSION 2.4.7)
+cmake_minimum_required(VERSION 3.1)
 
 if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)
 endif(COMMAND cmake_policy)
 
 PROJECT(TicFocuserNG CXX)
-#include(ExternalProject)
 
 set (TICFOCUSER_VERSION_MAJOR 1)
 set (TICFOCUSER_VERSION_MINOR 0)
-
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/TicFocuser_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/TicFocuser_config.h)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/indi_ticfocuser-ng.xml.in ${CMAKE_CURRENT_BINARY_DIR}/indi_ticfocuser-ng.xml)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/")
 set(BIN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/bin")
 set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
 
+set(INDI_TICFOCUSER-NG_SRCS
+        ${CMAKE_CURRENT_SOURCE_DIR}/TicFocuser.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/connection/UsbConnectionBase.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/connection/SerialConnection.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/connection/driver_interfaces/TiclibInterface.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/connection/ticlib/TicBase.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/connection/ticlib/TicDefs.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/connection/ticlib/StreamSerial.cpp
+    )
+
+add_executable(indi_ticfocuser-ng)
+
 find_package(INDI REQUIRED)
-#find_package(PkgConfig)
-
-find_package(LIBUSB_1)
-find_package(LIBBLUETOOTH)
-
-pkg_check_modules(LIBTIC-1 libpololu-tic-1)
-#string (REPLACE ";" " " LIBTIC-1_CFLAGS "${LIBTIC-1_CFLAGS}")
-#string (REPLACE ";" " " LIBTIC-1_LDFLAGS "${LIBTIC-1_LDFLAGS}")
-
-#pkg_check_modules(LIBBLUETOOTH libbluetooth)
-
-#message("${LIBUSB_1_INCLUDE_DIRS}")
-
-#set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${LIBTIC-1_CFLAGS}")
-#set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LIBTIC-1_CFLAGS}")
+target_link_libraries( indi_ticfocuser-ng indidriver)
 
 include_directories( ${CMAKE_CURRENT_BINARY_DIR})
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR})
 
 include_directories( 
-	{CMAKE_CURRENT_BINARY_DIR}
-	${INDI_INCLUDE_DIR} 
-	${LIBTIC-1_INCLUDE_DIR} 
-	${LIBUSB_1_INCLUDE_DIRS} )
+    {CMAKE_CURRENT_BINARY_DIR}
+    ${INDI_INCLUDE_DIR} )
 
-set(indi_ticfocuser-ng_SRCS
-        ${CMAKE_CURRENT_SOURCE_DIR}/TicFocuser.cpp
-
-        ${CMAKE_CURRENT_SOURCE_DIR}/connection/UsbConnectionBase.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/connection/PololuUsbConnection.cpp
+find_package(LIBUSB_1)
+if (LIBUSB_1_FOUND)
+    
+    list(APPEND INDI_TICFOCUSER-NG_SRCS
         ${CMAKE_CURRENT_SOURCE_DIR}/connection/LibUsbConnection.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/connection/BluetoothConnection.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/connection/SerialConnection.cpp
-
-        ${CMAKE_CURRENT_SOURCE_DIR}/connection/driver_interfaces/PololuUsbInterface.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/connection/driver_interfaces/TiclibInterface.cpp
-
-        ${CMAKE_CURRENT_SOURCE_DIR}/connection/ticlib/TicBase.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/connection/ticlib/TicDefs.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/connection/ticlib/TicUsb.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/connection/ticlib/StreamBT.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/connection/ticlib/StreamSerial.cpp
+        )
+
+    include_directories(${LIBUSB_1_INCLUDE_DIRS})
+    target_link_libraries( indi_ticfocuser-ng "${LIBUSB_1_LIBRARIES}")
+
+    set(WITH_LIBUSB TRUE)
+endif()
+
+find_package(LIBBLUETOOTH)
+if (LIBBLUETOOTH_FOUND)
+
+    list(APPEND INDI_TICFOCUSER-NG_SRCS
+        ${CMAKE_CURRENT_SOURCE_DIR}/connection/ticlib/StreamBT.cpp            ${CMAKE_CURRENT_SOURCE_DIR}/connection/BluetoothConnection.cpp
     )
 
-add_executable(indi_ticfocuser-ng ${indi_ticfocuser-ng_SRCS})
+    target_link_libraries( indi_ticfocuser-ng "${LIBBLUETOOTH_LIBRARIES}")
 
-target_compile_options(indi_ticfocuser-ng PUBLIC
-	${LIBTIC-1_CFLAGS}
-)
+    set(WITH_BLUETOOTH TRUE)
+endif()
 
-target_link_libraries( indi_ticfocuser-ng 
-	indidriver 
-	"${LIBTIC-1_LIBRARIES}"
-	"${LIBUSB_1_LIBRARIES}"
-	"${LIBBLUETOOTH_LIBRARIES}"
-	)
+pkg_check_modules(LIBTIC-1 libpololu-tic-1)
+if(LIBTIC-1_FOUND)
 
-#target_include_directories( indi_ticfocuser-ng PUBLIC
-#	${LIBTIC-1_CFLAGS}
-#	)
+    list(APPEND INDI_TICFOCUSER-NG_SRCS
+        ${CMAKE_CURRENT_SOURCE_DIR}/connection/driver_interfaces/PololuUsbInterface.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/connection/PololuUsbConnection.cpp
+        )
+    include_directories(${LIBTIC-1_INCLUDE_DIR})
+    target_compile_options(indi_ticfocuser-ng PUBLIC ${LIBTIC-1_CFLAGS})
+    target_link_libraries( indi_ticfocuser-ng "${LIBTIC-1_LIBRARIES}")
+
+    set(WITH_LIBTIC TRUE)
+endif()
+
+target_sources(indi_ticfocuser-ng PUBLIC ${INDI_TICFOCUSER-NG_SRCS})
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/TicFocuser_config.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/TicFocuser_config.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/indi_ticfocuser-ng.xml.in
+    ${CMAKE_CURRENT_BINARY_DIR}/indi_ticfocuser-ng.xml)
 
 install(TARGETS indi_ticfocuser-ng RUNTIME DESTINATION bin )
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/indi_ticfocuser-ng.xml DESTINATION ${INDI_DATA_DIR})
+
 

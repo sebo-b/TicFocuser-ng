@@ -25,17 +25,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <fstream>
 #include <string>
 
-#include "tic.h"
-
+#include "TicFocuser_config.h"
 #include "TicFocuser.h"
-#include "connection/PololuUsbConnection.h"
-#include "connection/LibUsbConnection.h"
-#include "connection/BluetoothConnection.h"
-#include "connection/SerialConnection.h"
 
+#include "connection/SerialConnection.h"
 #include "connection/ticlib/TicDefs.h"
 
-#include "TicFocuser_config.h"
+#ifdef WITH_LIBTIC
+#include "connection/PololuUsbConnection.h"
+#endif
+
+#ifdef WITH_LIBUSB
+#include "connection/LibUsbConnection.h"
+#endif
+
+#ifdef WITH_BLUETOOTH
+#include "connection/BluetoothConnection.h"
+#endif
 
 //#include <indilogger.h>
 //INDI::Logger::getInstance().print("TIC Focuser NG",INDI::Logger::DBG_WARNING, __FILE__, __LINE__,"jest context");
@@ -122,9 +128,15 @@ bool TicFocuser::initProperties()
     IUFillTextVector(&InfoErrorSP, InfoErrorS, tic_error_names_ui_size, getDeviceName(), "TIC_INFO_ERROR", "Tic Error", INFO_TAB, IP_RO, 60, IPS_IDLE);
 
     /***** Connections */
+#ifdef WITH_LIBTIC
     registerConnection(new PololuUsbConnection(this));
+#endif
+#ifdef WITH_LIBUSB
     registerConnection(new LibUsbConnection(this));
+#endif
+#ifdef WITH_BLUETOOTH
     registerConnection(new BluetoothConnection(this));
+#endif
     registerConnection(new SerialConnection(this));
 
     return true;
