@@ -28,16 +28,19 @@ OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include "Stream.h"
+#include <string>
 
 class StreamBT: public Stream
 {
 	int btSocket;
+	std::string btMacAddress;
 
 public:
 	StreamBT();
 	~StreamBT();
 
 	bool connect(const char* btMacAddress);
+	bool reconnect();
 	void disconnect();
 
 	size_t write(uint8_t byte);

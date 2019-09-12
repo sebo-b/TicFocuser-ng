@@ -40,7 +40,8 @@ size_t StreamSerial::readBytes(char *buffer, size_t length)
 	int numZeros = 0;	// safety counter, if we read 5x0 in a row, we eject
 
 	// try to read until we receive enough bytes
-	while (readC < length && numZeros < 5) {
+	while (readC < length && numZeros < 5)
+	{
 
 		if (readC > 0)
 			usleep(10);
@@ -48,10 +49,15 @@ size_t StreamSerial::readBytes(char *buffer, size_t length)
 		size_t c = ::read(fd, buffer + readC, length - readC);
 		readC += c;
 
-		if (c == 0)
-			++numZeros;
-		else
-			numZeros = 0;
+	    if (c > 0)
+	    {
+	      readC += c;
+	      numZeros = 0;
+	    }
+	    else
+	    {
+	      ++numZeros;
+	    }
 	}
 
   return readC;

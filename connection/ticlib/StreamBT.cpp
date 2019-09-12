@@ -41,8 +41,11 @@ StreamBT::~StreamBT()
 	disconnect();
 }
 
-bool StreamBT::connect(const char* btMacAddress)
+bool StreamBT::reconnect()
 {
+  if (btMacAddress.empty())
+    return false;
+
   struct sockaddr_rc laddr, raddr;
 
   laddr.rc_family = AF_BLUETOOTH;
@@ -52,11 +55,17 @@ bool StreamBT::connect(const char* btMacAddress)
 
   raddr.rc_family = AF_BLUETOOTH;
   raddr.rc_channel = 1;
-  str2ba(btMacAddress,&raddr.rc_bdaddr);
+  str2ba(btMacAddress.c_str(),&raddr.rc_bdaddr);
 
   btSocket = ::socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
   if (btSocket < 0)
-  	return false;
+    return false;
+
+  timeval timeout = { 1, 0 };
+  if (setsockopt(btSocket, SOL_SOCKET, SO_RCVTIMEO, (char *) &timeout, sizeof(timeout))) {
+    close(btSocket);
+    return false;    
+  }
 
   if (::bind(btSocket, (struct sockaddr *) &laddr, sizeof(laddr)) < 0) {
     close(btSocket);
@@ -68,7 +77,13 @@ bool StreamBT::connect(const char* btMacAddress)
     return false;
   }
 
-  return true;
+  return true;  
+}
+
+bool StreamBT::connect(const char* btMacAddress)
+{
+  StreamBT::btMacAddress = btMacAddress;
+  return reconnect();
 }
 
 void StreamBT::disconnect()
@@ -80,7 +95,22 @@ void StreamBT::disconnect()
 
 size_t StreamBT::write(uint8_t byte)
 {
-  return ::write(btSocket,&byte,sizeof(byte));
+  ssize_t c = 0;
+  int numZeros = 0; // safety counter, if we read 5x0 in a row, we eject
+
+  while (numZeros < 3)
+  {
+    c = ::write(btSocket,&byte,sizeof(byte));
+
+    if (c > 0)
+      break;
+
+    reconnect();
+    usleep(10);
+    ++numZeros;
+  }
+
+  return c;
 }
 
 size_t StreamBT::readBytes(char *buffer, size_t length)
@@ -89,18 +119,28 @@ size_t StreamBT::readBytes(char *buffer, size_t length)
   int numZeros = 0; // safety counter, if we read 5x0 in a row, we eject
 
   // try to read until we receive enough bytes
-  while (readC < length && numZeros < 5) {
+  while (readC < length && numZeros < 5)
+  {
 
     if (readC > 0)
       usleep(10);
     
-    size_t c = ::read(btSocket, buffer + readC, length - readC);
-    readC += c;
+    ssize_t c = ::read(btSocket, buffer + readC, length - readC);
 
-    if (c == 0)
-      ++numZeros;
-    else
+    // BT got disconnected
+    if (c < 0) {
+      reconnect();
+    }
+
+    if (c > 0)
+    {
+      readC += c;
       numZeros = 0;
+    }
+    else
+    {
+      ++numZeros;
+    }
   }
 
   return readC;
