@@ -67,6 +67,11 @@ bool StreamBT::reconnect()
     return false;    
   }
 
+  if (setsockopt(btSocket, SOL_SOCKET, SO_SNDTIMEO, (char *) &timeout, sizeof(timeout))) {
+    close(btSocket);
+    return false;    
+  }
+
   if (::bind(btSocket, (struct sockaddr *) &laddr, sizeof(laddr)) < 0) {
     close(btSocket);
     return false;
