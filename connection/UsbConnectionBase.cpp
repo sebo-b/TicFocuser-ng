@@ -16,16 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
-#include "tic_connection.h"
-
-#include <string.h>
+#include "UsbConnectionBase.h"
+#include "driver_interfaces/TicDriverInterface.h"
 
 #include <indilogger.h>
-#include <tic.h>
+#include <string.h>
 
-
-TicConnection::TicConnection(INDI::DefaultDevice *dev):
-    Interface(dev, CONNECTION_USB), handle(NULL)
+UsbConnectionBase::UsbConnectionBase(const char* serialNFieldName, INDI::DefaultDevice *dev):
+    Interface(dev, CONNECTION_USB)
 {
     const size_t MAX_SERIAL_NUMBER = 20; // serial number has 8 characters, 20 is super safe
     char serialNumber[MAX_SERIAL_NUMBER];    
@@ -37,95 +35,42 @@ TicConnection::TicConnection(INDI::DefaultDevice *dev):
     	requiredSerialNumber = serialNumber;
     }
 
-    IUFillText(TicSerialNumberT, "TIC_SERIAL_NUMBER", "Tic Serial Number", serialNumber);
-    IUFillTextVector(&TicSerialNumberTP, TicSerialNumberT, 1, getDeviceName(), "TIC_SERIAL_TP", "Tic Serial Number", CONNECTION_TAB,
+    std::string serialNFieldNameTP = serialNFieldName;
+    serialNFieldNameTP += "_TP";
+
+    IUFillText(TicSerialNumberT, serialNFieldName, "Tic Serial Number", serialNumber);
+    IUFillTextVector(&TicSerialNumberTP, TicSerialNumberT, 1, getDeviceName(), serialNFieldNameTP.c_str(), "Tic Serial Number", CONNECTION_TAB,
                      IP_RW, 60, IPS_IDLE);
 };
 
-TicConnection::~TicConnection() 
+UsbConnectionBase::~UsbConnectionBase() 
 {
-    tic_handle_close(handle);
 };
 
-bool TicConnection::Connect() 
-{ 
-    tic_device** deviceList;
-    tic_error *e = NULL;
-
-    if (handle) {
-        LOG_ERROR("Not NULL handle in TicConnection::Connect. Something is very wrong.");
-        return false;    
-    }
-
-    e = tic_list_connected_devices(&deviceList,NULL);
-
-    if (e) {
-        const char* errMsg = tic_error_get_message(e);
-        LOGF_ERROR("Cannot get list of connected TIC devices. Error: %s", errMsg);
-        tic_error_free(e);
-        return false;
-    }
-
-    for (tic_device** d = deviceList; *d; ++d) {
-
-        const char* devSerial = tic_device_get_serial_number(*d);
-
-        if (requiredSerialNumber.empty() || requiredSerialNumber == devSerial) {
-            
-            e = tic_handle_open(*d,&handle);
-            if (e) {
-                const char* errMsg = tic_error_get_message(e);
-                LOGF_ERROR("Cannot open handle to TIC device with serial: %s. Error: %s", devSerial, errMsg);
-                tic_error_free(e);
-                handle = NULL;
-            }
-
-            TicSerialNumberTP.s = requiredSerialNumber.empty()? IPS_IDLE: IPS_OK;
-            IUSaveText(TicSerialNumberT, devSerial);
-            IDSetText(&TicSerialNumberTP, nullptr);
-
-            break;
-        }
-    }
-
-    for (tic_device** d = deviceList; *d; ++d)
-        tic_device_free(*d);
-    tic_list_free(deviceList);
-
-    if (!handle) {
-        if (requiredSerialNumber.empty())
-            LOG_ERROR("No TIC device found.");
-        else 
-            LOGF_ERROR("No TIC device found with serial: %s. You can set serial to empty to connect to the first found Tic device.", requiredSerialNumber.c_str());
-        return false;
-    }
-
-    return true;
-};
-
-bool TicConnection::Disconnect() 
-{ 
-    tic_handle_close(handle);
-    handle = NULL;
-
+bool UsbConnectionBase::Disconnect() 
+{
     IUSaveText(TicSerialNumberT, requiredSerialNumber.c_str());
     TicSerialNumberTP.s = requiredSerialNumber.empty()? IPS_IDLE: IPS_OK;
     IDSetText(&TicSerialNumberTP, nullptr);
 
-    return true;
+    return true; //Connection::Interface::Disconnect();
 };
 
-void TicConnection::Activated() 
+void UsbConnectionBase::Activated() 
 {
     m_Device->defineText(&TicSerialNumberTP);
+
+    //Connection::Interface::Activated();
 };
 
-void TicConnection::Deactivated() 
+void UsbConnectionBase::Deactivated() 
 {
     m_Device->deleteProperty(TicSerialNumberTP.name);
+
+    //Connection::Interface::Deactivated();
 };
 
-bool TicConnection::saveConfigItems(FILE *fp) {
+bool UsbConnectionBase::saveConfigItems(FILE *fp) {
 
     if (!Connection::Interface::saveConfigItems(fp))
         return false;
@@ -144,7 +89,7 @@ bool TicConnection::saveConfigItems(FILE *fp) {
     return true;
 }
 
-bool TicConnection::ISNewText(const char *dev, const char *name, char *texts[], char *names[], int n)
+bool UsbConnectionBase::ISNewText(const char *dev, const char *name, char *texts[], char *names[], int n)
 {
     if (!strcmp(dev, m_Device->getDeviceName()))
     {
@@ -179,4 +124,3 @@ bool TicConnection::ISNewText(const char *dev, const char *name, char *texts[], 
 
     return Connection::Interface::ISNewText(dev,name,texts,names,n);
 }
-

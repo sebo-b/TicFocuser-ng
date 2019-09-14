@@ -63,6 +63,21 @@ class TicFocuser : public INDI::Focuser
         ISwitch EnergizeFocuserS[2];
         ISwitchVectorProperty EnergizeFocuserSP;
 
+        enum InfoTab {
+            VIN_VOLTAGE,
+            CURRENT_LIMIT,
+            ENERGIZED,
+            STEP_MODE,
+            OPERATION_STATE,
+
+            InfoTabSize
+        };
+
+        IText InfoS[InfoTabSize] = {};
+        ITextVectorProperty InfoSP;
+
+        IText* InfoErrorS;
+        ITextVectorProperty InfoErrorSP;
 };
 
 #endif // TICFOCUSER_H

@@ -16,42 +16,50 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
-#ifndef TICCONNECTION_H
-#define TICCONNECTION_H
+#ifndef BLUETOOTHCONNECTION_H
+#define BLUETOOTHCONNECTION_H
 
 #include <connectionplugins/connectioninterface.h>
+#include "TicConnectionInterface.h"
 
-struct tic_handle;
+class StreamBT;
+class TicSerial;
 
-class TicConnection: public Connection::Interface {
-    
+class BluetoothConnection:
+    public Connection::Interface,
+    public TicConnectionInterface
+{
     public:
 
-        TicConnection(INDI::DefaultDevice *dev);
-        ~TicConnection();
-        
+        BluetoothConnection(INDI::DefaultDevice *dev);
+        ~BluetoothConnection();
+
+        std::string name() { return "Tic Bluetooth Connection"; };
+        std::string label() { return "Bluetooth"; };
+     
         bool Connect();
         bool Disconnect();
         void Activated();
         void Deactivated();
 
         bool ISNewText(const char *dev, const char *name, char *texts[], char *names[], int n);
-
-        tic_handle* getHandle() { return handle; }
-
-        std::string name() { return "TicFocuser USB Connection"; };
-        std::string label() { return "TicUSB"; };
-
         bool saveConfigItems(FILE *fp);
 
+        TicDriverInterface& getTicDriverInterface()   { return *ticDriverInterface; }
+        
     private:
 
-        tic_handle* handle;
+        bool callHandshake();
 
-        IText TicSerialNumberT[1] {};
-        ITextVectorProperty TicSerialNumberTP;
+        IText BtMacAddressT[1] {};
+        ITextVectorProperty BtMacAddressTP;
 
-        std::string requiredSerialNumber;
+        std::string requiredBtMacAddress;
+
+        TicDriverInterface* ticDriverInterface;
+
+        StreamBT* streamBT;
+        TicSerial* ticSerial;
 };
 
-#endif // TICCONNECTION_H
+#endif // BLUETOOTHCONNECTION_H
