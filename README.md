@@ -23,20 +23,22 @@ This is a driver for a great framework: INDI. INDI together with KStars is opens
 The driver can utilize various connection interfaces to communicate with Pololu Tic controller. Some connections require particular libraries to be installed in your machine, CMake script will automatically detect these dependencies and enable only these connections, which can be compiled.
 
 Available connections:
-1. PololuUSB - this is USB connection which utilizes (Pololu Tic C library)[https://github.com/pololu/pololu-tic-software]. Check (dependencies)[#Dependencies] section for more info about installing it.
+1. PololuUSB - this is USB connection which utilizes [Pololu Tic C library](https://github.com/pololu/pololu-tic-software). Check (dependencies)[#Dependencies] section for more info about installing it.
 2. LibUSB - this is USB connection with utilizes standard libusb-1 probably available on all Linux distributiins. It also modified [Pololu Tic Arduino library](https://github.com/pololu/tic-arduino). Only libusb-1 is needed to make it work.
 3. Bluetooth - this is serial Bluetooth connection. Uses [Pololu Tic Arduino library](https://github.com/pololu/tic-arduino) and depends on standard libbluetooth.
 4. Serial - this is regular serial connection (after configuring rfcomm tty can be also used for Bluetooth). This connection is always compiled.
 
 ### Dependencies
 
+Please note that you need these libraries for compilation, so on most Linux distributions you'll need *-dev versions of these.
+
 1. You need INDI library installed together with headers. Most of Linux distributions have it in the repo. To install it on Arch simply type `pacman -S libindi`
 
-2. PololuUSB - you need Pololu Tic library. You can find instructions on how to download it and compile on [Pololu site](https://www.pololu.com/docs/0J71). On Arch you can use AUR package created by myself available [here](https://aur.archlinux.org/packages/pololu-tic-software/).
+2. PololuUSB - for this connection you'll need Pololu Tic library. You can find instructions on how to download it and compile on [Pololu site](https://www.pololu.com/docs/0J71). On Arch you can use AUR package created by myself available [here](https://aur.archlinux.org/packages/pololu-tic-software/).
 
-3. LibUSB - you need libusb-1. If it is not installed, install it from your Linux distribution repository.
+3. LibUSB - for LibUSB based connection you need libusb-1. A lot of software depends on this library, so it is usually already installed in the system. If it is not installed, install it from your Linux distribution repository.
 
-4. LibBluetooth - you need libbluetooth. If it is not installed, install it from your Linux distribution repository.
+4. LibBluetooth - if you are going to use Bluetooth, you need libbluetooth. If it is not installed, install it from your Linux distribution repository.
 
 ### Compilation
 
@@ -69,7 +71,7 @@ You can read more about setting up proper motor parameters in [chapter 4.3 of Po
 
 ### Configure KStars
 
-Add `TicFocuser` to INDI profile in KStars and you are good to go.
+Add `Tic Focuser NG` to INDI profile in KStars and you are good to go.
 
 # Hardware
 
@@ -82,15 +84,43 @@ Add `TicFocuser` to INDI profile in KStars and you are good to go.
 
 ![NEMA17](https://raw.githubusercontent.com/sebo-b/TicFocuser-ng/master/extras/nema17.jpg)
 
-3. Possibility to 3D print the case.
-4. DC Barrel Power Jack Socket 5.5mm/2.1mm.
+As I don't relly need much of torque recently I have also bought a much thinner NEMA-17 motor. Model name is 17Hs08-1004S.
+
+![NEMA17_Small](https://raw.githubusercontent.com/sebo-b/TicFocuser-ng/master/extras/nema17_small.jpg)
+
+3. In case you prefer Bluetooth over USB connection, you need a Bluetooth module (find more in the next section).
+
+![DX-BT18](https://raw.githubusercontent.com/sebo-b/TicFocuser-ng/master/extras/dx-bt18.jpg)
+
+4. Possibility to 3D print the case.
+5. DC Barrel Power Jack Socket 5.5mm/2.1mm.
 
 ![DC](https://raw.githubusercontent.com/sebo-b/TicFocuser-ng/master/extras/dc_barrel.jpg)
 
-5. Basic soldering skills.
-6. A way to connect the stepper motor to your focuser.
+6. Basic soldering skills.
+7. A way to connect the stepper motor to your focuser.
+
+### Bluetooth module
+
+Focuser doesn't require a high bitrate, and Bluetooth is built into PC (Intel NUC) which I'm using. Also, RaspberryPi has it onboard. So I thought that getting rid of one cable is worth the effort.
+
+Most of the BT modules supporting SPP profile should basically work. However, HC-06 is probably the most popular one. What you need to pay attention for is that UART on Pololu Tic is 5V logic. What's more, Pololu in the documentation is stating:
+
+> The serial interface uses non-inverted TTL logic levels: a level of 0 V corresponds to a value of 0, and a level of 5 V corresponds to a value of 1. The input signal on the RX pin must reach at least 4 V to be guaranteed to be read as high, but 3.3 V signals on RX typically work anyway.
+
+The main concern I had was if 3.3V (5V tolerant) module will actually be able to communicate directly with Tic, what exactly "typically work anyway" mean. I have checked the specification of Pic (SoC used on Tic Controller), and it is clear there that 4V is the minimum voltage for high level. Nonetheless, Pololu also specifies that TX/RX are pulled up.
+
+> The Tic’s RX pin is an input, and its TX pin is an output. Each pin has an integrated 100 kΩ resistor pulling it up to 5 V and a 220 Ω or 470 Ω series resistor protecting it from short circuits.
+
+So my assumption was that Pololu could not clearly state 3.3V tolerant, as Pic doesn't tolerate it. However, pulled up pin should do the job. I was apparently right because the module I have is able to communicate with Tic Controller.
+
+HC-05 and HC-06 are probably the most popular Bluetooth 2.0 to SPP modules. I, however, went for a different one, DX-BT18. It looked very solid, had FCC certification (and English documentation available on FCC site), it supports dual-mode (maybe in the future I add BLE connection) and was extreamly cheap ($2.10 on Aliexpress). Of course, you need the one with base-board as it has LDO from 6V to 3.3V.
+
+I have setup baud-rate on the module and Tic to 115200, and it works like a charm. Just one note, documentation says that 115200 is the 4th mode: `AT+BAUD=4`. 4th mode is actually 57600, to set up 115200 I had to use 5th, undocumented mode: `AT+BAUD=5`.
 
 ### 3D printed case
+
+NOTE: this is a version of the hardware without Bluetooth module. I'll publish an updated version when I finish it.
 
 Model of controller case looks like the following:
 
