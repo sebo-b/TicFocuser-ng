@@ -22,11 +22,13 @@ This is a driver for a great framework: INDI. INDI together with KStars is opens
 
 The driver can utilize various connection interfaces to communicate with Pololu Tic controller. Some connections require particular libraries to be installed in your machine, CMake script will automatically detect these dependencies and enable only these connections, which can be compiled.
 
+There are two separate libraries used to manage Tic protocol. These are [Pololu Tic USB C library](https://github.com/pololu/pololu-tic-software) and [Pololu Tic Arduino library](https://github.com/pololu/tic-arduino). Both libraries are developed by Pololu, but apparently they doesn't share the code. The first one can be used only for USB connection. The second one is more generic and can utilize serial connections. However, it is developed for Arduino and was probably not meant to be compiled on Linux. I have ported it to Linux and extended for Bluetooth and USB (it can also be extended to I2C, but so far there was no such a request from the community). 
+
 Available connections:
-1. PololuUSB - this is USB connection which utilizes [Pololu Tic C library](https://github.com/pololu/pololu-tic-software). Check (dependencies)[#Dependencies] section for more info about installing it.
-2. LibUSB - this is USB connection with utilizes standard libusb-1 probably available on all Linux distributiins. It also modified [Pololu Tic Arduino library](https://github.com/pololu/tic-arduino). Only libusb-1 is needed to make it work.
-3. Bluetooth - this is serial Bluetooth connection. Uses [Pololu Tic Arduino library](https://github.com/pololu/tic-arduino) and depends on standard libbluetooth.
-4. Serial - this is regular serial connection (after configuring rfcomm tty can be also used for Bluetooth). This connection is always compiled.
+1. PololuUSB - this is a USB connection which utilizes [Pololu Tic C library](https://github.com/pololu/pololu-tic-software). Check [dependencies](#Dependencies) section for more info about installing it.
+2. LibUSB - this is a USB connection with utilizes standard libusb-1 library probably available on all Linux distributiins. It use modified [Pololu Tic Arduino library](https://github.com/pololu/tic-arduino) which is included in this repo. Only libusb-1 is needed to make it work.
+3. Bluetooth - this is a serial Bluetooth connection. It also uses [Pololu Tic Arduino library](https://github.com/pololu/tic-arduino) and depends on standard libbluetooth.
+4. Serial - this is a regular serial connection (after configuring rfcomm tty can be also used for Bluetooth). This connection is always compiled.
 
 ### Dependencies
 
