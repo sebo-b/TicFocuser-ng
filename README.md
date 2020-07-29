@@ -44,7 +44,7 @@ Please note that you need these libraries for compilation, so on most Linux dist
 
 ### Compilation
 
-In general, you should use released version instead of git bleeding-edge work. The latest release was v0.9.
+In general, you should use released version instead of git bleeding-edge work. The latest release was v1.0-rc.
 
 ```
 $ curl -L https://github.com/sebo-b/TicFocuser-ng/archive/v1.0-rc.tar.gz | tar -xz
