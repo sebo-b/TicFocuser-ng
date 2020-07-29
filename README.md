@@ -47,8 +47,8 @@ Please note that you need these libraries for compilation, so on most Linux dist
 In general, you should use released version instead of git bleeding-edge work. The latest release was v0.9.
 
 ```
-$ curl -L https://github.com/sebo-b/TicFocuser-ng/archive/v0.9.tar.gz | tar -xz
-$ cd TicFocuser-ng-0.9
+$ curl -L https://github.com/sebo-b/TicFocuser-ng/archive/v1.0-rc.tar.gz | tar -xz
+$ cd TicFocuser-ng-1.0-rc
 $ mkdir build && cd build
 $ cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr ..
 $ make
