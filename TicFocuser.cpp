@@ -1,6 +1,6 @@
 /*******************************************************************************
 TicFocuser
-Copyright (C) 2019 Sebastian Baberowski
+Copyright (C) 2019-2021 Sebastian Baberowski
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -87,12 +87,13 @@ void ISSnoopDevice (XMLEle *root)
 }
 
 TicFocuser::TicFocuser():
+    lastTimerHitError(false),
     moveRelInitialValue(-1),
-    lastTimerHitError(false)
+    lastFocusDir(FOCUS_INWARD)
 {
     setVersion(TICFOCUSER_VERSION_MAJOR,TICFOCUSER_VERSION_MINOR);
     setSupportedConnections(CONNECTION_NONE);
-    FI::SetCapability(FOCUSER_CAN_ABS_MOVE | FOCUSER_CAN_REL_MOVE | FOCUSER_CAN_SYNC | FOCUSER_CAN_ABORT );
+    FI::SetCapability(FOCUSER_CAN_ABS_MOVE | FOCUSER_CAN_REL_MOVE | FOCUSER_CAN_SYNC | FOCUSER_CAN_ABORT | FOCUSER_HAS_BACKLASH);
 
     InfoErrorS = new IText[tic_error_names_ui_size];
 }
@@ -116,7 +117,7 @@ bool TicFocuser::initProperties()
 
     /***** INFO_TAB */
     IUFillText(&InfoS[VIN_VOLTAGE], "VIN_VOLTAGE", "Vin voltage", "");
-    IUFillText(&InfoS[CURRENT_LIMIT], "CURRENT_LIMIT", "Currnet limit", "");
+    IUFillText(&InfoS[CURRENT_LIMIT], "CURRENT_LIMIT", "Current limit", "");
     IUFillText(&InfoS[STEP_MODE], "STEP_MODE", "Step mode", "");
     IUFillText(&InfoS[ENERGIZED], "ENERGIZED", "Energized", "");
     IUFillText(&InfoS[OPERATION_STATE], "OPERATION_STATE", "Operational state", "");
@@ -405,16 +406,36 @@ IPState TicFocuser::MoveRelFocuser(FocusDirection dir, uint32_t ticks)
 }
 
 IPState TicFocuser::MoveAbsFocuser(uint32_t ticks)
-{
-    if (ticks < FocusAbsPosN[0].min || ticks > FocusAbsPosN[0].max)
-    {
-        LOG_ERROR("Requested position is out of range.");
-        return IPS_ALERT;
-    }
-        
+{ 
     if (ticks == FocusAbsPosN[0].value)
     {
         return IPS_OK;
+    }
+    else if (ticks > FocusAbsPosN[0].value)
+    {
+        if(lastFocusDir == FOCUS_INWARD && FocusBacklashS[INDI_ENABLED].s == ISS_ON)
+        {
+            uint32_t nominal = ticks;
+            ticks = static_cast<uint32_t>(std::min(ticks + FocusBacklashN[0].value, FocusAbsPosN[0].max));
+            LOGF_INFO("Apply backlash (in->out): +%d", ticks - nominal);
+        }
+        lastFocusDir = FOCUS_OUTWARD;
+    }
+    else if (ticks < FocusAbsPosN[0].value && FocusBacklashS[INDI_ENABLED].s == ISS_ON)
+    {
+        if(lastFocusDir == FOCUS_OUTWARD)
+        {
+            uint32_t nominal = ticks;
+            ticks = static_cast<uint32_t>(std::max(ticks - FocusBacklashN[0].value, FocusAbsPosN[0].min));
+            LOGF_INFO("Apply backlash (out->in): %d", ticks - nominal);
+        }
+        lastFocusDir = FOCUS_INWARD;
+    }
+
+    if (ticks < FocusAbsPosN[0].min || ticks > FocusAbsPosN[0].max)
+    {
+        LOGF_ERROR("Requested position is out of range: %d", ticks);
+        return IPS_ALERT;
     }
 
     TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
@@ -427,4 +448,10 @@ IPState TicFocuser::MoveAbsFocuser(uint32_t ticks)
     }
   
     return IPS_BUSY;
+}
+
+bool TicFocuser::SetFocuserBacklash(int32_t steps)
+{
+    INDI_UNUSED(steps);
+    return true;
 }
