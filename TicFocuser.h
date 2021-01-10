@@ -1,6 +1,6 @@
 /*******************************************************************************
 TicFocuser
-Copyright (C) 2019 Sebastian Baberowski
+Copyright (C) 2019-2021 Sebastian Baberowski
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -51,11 +51,15 @@ class TicFocuser : public INDI::Focuser
 
         bool energizeFocuser();
         bool deenergizeFocuser();
+    
+    protected:
+        virtual bool SetFocuserBacklash(int32_t steps) override;
 
     private:
 
-        bool lastTimerHitError; //< used to not flood user with the same error messge if it repeats
-        int32_t moveRelInitialValue;    //< used to simulate MoveRelFocuser
+        bool lastTimerHitError;      //< used to not flood user with the same error messge if it repeats
+        int32_t moveRelInitialValue; //< used to simulate MoveRelFocuser
+        FocusDirection lastFocusDir; //< used to identify direction reversal (for backlash)
 
         ISwitch FocusParkingModeS[2];
         ISwitchVectorProperty FocusParkingModeSP;
