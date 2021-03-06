@@ -21,6 +21,7 @@ enum class TicProduct
   T834 = 2,
   T500 = 3,
   T249 = 4,
+  Tic36v4 = 5,
 };
 
 /// This constant is used by the library to convert between milliamps and the
@@ -170,6 +171,9 @@ enum class TicStepMode
   Microstep16 = 4,
   Microstep32 = 5,
   Microstep2_100p = 6,
+  Microstep64 = 7,
+  Microstep128 = 8,
+  Microstep256 = 9,
 };
 
 /// This enum defines possible AGC modes.
@@ -276,7 +280,7 @@ enum class TicMiscFlags1
   HomingActive = 4,
 };
 
-/// This enum defines possible motor driver errors.
+/// This enum defines possible motor driver errors for the Tic T249.
 ///
 /// See TicBase::getLastMotorDriverError().
 enum class TicMotorDriverError
@@ -284,6 +288,20 @@ enum class TicMotorDriverError
   None = 0,
   OverCurrent = 1,
   OverTemperature = 2,
+};
+
+/// This enum defines the bits in the "Last HP driver errors" variable.
+///
+/// See TicBase::getLastHpDriverErrors().
+enum class TicHpDriverError
+{
+  OverTemperature = 0,
+  OverCurrentA = 1,
+  OverCurrentB = 2,
+  PreDriverFaultA = 3,
+  PreDriverFaultB = 4,
+  UnderVoltage = 5,
+  Verify = 7,
 };
 
 /// This is a base class used to represent a connection to a Tic.  This class
@@ -305,6 +323,7 @@ public:
   /// tic.setProduct(TicProduct::T834);
   /// tic.setProduct(TicProduct::T825);
   /// tic.setProduct(TicProduct::T249);
+  /// tic.setProduct(TicProduct::Tic36v4);
   /// ```
   ///
   /// This changes the behavior of the setCurrentLimit() function.
@@ -669,7 +688,7 @@ public:
   /// See also getAgcBottomCurrentLimit().
   void setAgcBottomCurrentLimit(TicAgcBottomCurrentLimit limit)
   {
-    commandW7(TicCommand::SetAgcOption, 0x10 | (uint8_t)limit & 0xF);
+    commandW7(TicCommand::SetAgcOption, 0x10 | ((uint8_t)limit & 0xF));
   }
 
   /// Temporarily sets the AGC current boost steps.
@@ -679,7 +698,7 @@ public:
   /// See also getAgcCurrentBoostSteps().
   void setAgcCurrentBoostSteps(TicAgcCurrentBoostSteps steps)
   {
-    commandW7(TicCommand::SetAgcOption, 0x20 | (uint8_t)steps & 0xF);
+    commandW7(TicCommand::SetAgcOption, 0x20 | ((uint8_t)steps & 0xF));
   }
 
   /// Temporarily sets the AGC frequency limit.
@@ -689,7 +708,7 @@ public:
   /// See also getAgcFrequencyLimit().
   void setAgcFrequencyLimit(TicAgcFrequencyLimit limit)
   {
-    commandW7(TicCommand::SetAgcOption, 0x30 | (uint8_t)limit & 0xF);
+    commandW7(TicCommand::SetAgcOption, 0x30 | ((uint8_t)limit & 0xF));
   }
 
   /// Gets the Tic's current operation state, which indicates whether it is
@@ -1176,8 +1195,7 @@ public:
 
   /// Gets the cause of the last motor driver error.
   ///
-  /// This is only valid for the Tic T249, and will be
-  /// TicMotorDriverError::None for other Tic models.
+  /// This is only valid for the Tic T249.
   TicMotorDriverError getLastMotorDriverError()
   {
     return (TicMotorDriverError)getVar8(VarOffset::LastMotorDriverError);
@@ -1221,6 +1239,17 @@ public:
   TicAgcFrequencyLimit getAgcFrequencyLimit()
   {
     return (TicAgcFrequencyLimit)getVar8(VarOffset::AgcFrequencyLimit);
+  }
+
+  /// Gets the "Last HP driver errors" variable.
+  ///
+  /// Each bit in this register represents an error.  If the bit is 1, the
+  /// error was one of the causes of the Tic's last motor driver error.
+  ///
+  /// This is only valid for the Tic 36v4.
+  uint8_t getLastHpDriverErrors()
+  {
+    return getVar8(VarOffset::LastHpDriverErrors);
   }
 
   /// Gets a contiguous block of settings from the Tic's EEPROM.
@@ -1295,6 +1324,7 @@ private:
     AgcBottomCurrentLimit = 0x57, // uint8_t
     AgcCurrentBoostSteps  = 0x58, // uint8_t
     AgcFrequencyLimit     = 0x59, // uint8_t
+    LastHpDriverErrors    = 0xFF, // uint8_t
   };
 
   uint8_t getVar8(uint8_t offset)

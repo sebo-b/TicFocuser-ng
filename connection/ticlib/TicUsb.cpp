@@ -25,18 +25,10 @@ OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
 #include "TicUsb.h"
+#include "TicDefs.h"
 
 #include <libusb.h>
 #include <string.h>
-
-// copied from pololu-tic-software/include/tic_protocol.h
-// licensed on MIT license
-#define TIC_VENDOR_ID 0x1FFB
-#define TIC_PRODUCT_ID_T825 0x00B3
-#define TIC_PRODUCT_ID_T834 0x00B5
-#define TIC_PRODUCT_ID_T500 0x00BD
-#define TIC_PRODUCT_ID_N825 0x00C3
-#define TIC_PRODUCT_ID_T249 0x00C9
 
 static const size_t MAX_SERIAL_NUMBER = 20; // serial number has 8 characters, 20 is super safe
 
@@ -82,9 +74,11 @@ void TicUsb::connect(const char* serialNo)
 
     if (desc.idVendor != TIC_VENDOR_ID ||
         (desc.idProduct != TIC_PRODUCT_ID_T825 &&
-         desc.idProduct != TIC_PRODUCT_ID_T825 &&
-         desc.idProduct != TIC_PRODUCT_ID_T825 &&
-         desc.idProduct != TIC_PRODUCT_ID_T825) )
+         desc.idProduct != TIC_PRODUCT_ID_T834 &&
+         desc.idProduct != TIC_PRODUCT_ID_T500 &&
+         desc.idProduct != TIC_PRODUCT_ID_N825 &&
+         desc.idProduct != TIC_PRODUCT_ID_T249 &&
+         desc.idProduct != TIC_PRODUCT_ID_36V4) )
     {
       continue;
     }

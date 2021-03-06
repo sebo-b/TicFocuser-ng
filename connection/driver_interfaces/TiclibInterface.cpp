@@ -122,8 +122,8 @@ bool TiclibInterface::getVariables(TicVariables* vars)
     vars->currentLimit = ticBase.getCurrentLimit();
     vars->energized = ticBase.getEnergized();
 
-    vars->stepMode = tic_look_up_name(tic_step_mode_names_ui, (int)ticBase.getStepMode());
-    vars->operationalState = tic_look_up_name(tic_operation_state_names_ui, (int)ticBase.getOperationState());
+    vars->stepMode = tic_look_up_step_mode_name_ui((int)ticBase.getStepMode());
+    vars->operationalState = tic_look_up_operation_state_name_ui((int)ticBase.getOperationState());
 
     vars->errorStatus = ticBase.getErrorStatus();
 
