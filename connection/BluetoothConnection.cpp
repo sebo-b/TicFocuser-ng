@@ -29,7 +29,7 @@ BluetoothConnection::BluetoothConnection(INDI::DefaultDevice *dev):
     Interface(dev, CONNECTION_CUSTOM)
 {
     const size_t MAX_BT_MAC = 40; // bt mac has 17 characters, 40 is super safe
-    char btMacAddress[MAX_BT_MAC];    
+    char btMacAddress[MAX_BT_MAC];
 
     if (IUGetConfigText(dev->getDeviceName(), "BT_MAC_TP", "BT_MAC_ADDRESS", btMacAddress, MAX_BT_MAC)) {
         btMacAddress[0] = '\0';
@@ -54,7 +54,7 @@ BluetoothConnection::BluetoothConnection(INDI::DefaultDevice *dev):
     });
 }
 
-BluetoothConnection::~BluetoothConnection() 
+BluetoothConnection::~BluetoothConnection()
 {
     delete ticDriverInterface;
     delete ticSerial;
@@ -85,8 +85,8 @@ bool BluetoothConnection::Connect()
     return true;
 }
 
-bool BluetoothConnection::Disconnect() 
-{ 
+bool BluetoothConnection::Disconnect()
+{
     streamBT->disconnect();
 
     LOG_INFO("Bluetooth disconnected.");
@@ -99,12 +99,12 @@ bool BluetoothConnection::callHandshake()
     return !ticSerial->getLastError() && uptime > 0;
 }
 
-void BluetoothConnection::Activated() 
+void BluetoothConnection::Activated()
 {
-    m_Device->defineText(&BtMacAddressTP);
+    m_Device->defineProperty(&BtMacAddressTP);
 }
 
-void BluetoothConnection::Deactivated() 
+void BluetoothConnection::Deactivated()
 {
     m_Device->deleteProperty(BtMacAddressTP.name);
 }
@@ -133,7 +133,7 @@ bool BluetoothConnection::ISNewText(const char *dev, const char *name, char *tex
     if (!strcmp(dev, m_Device->getDeviceName()))
     {
         if (!strcmp(name, BtMacAddressTP.name)) {
-            
+
             if (requiredBtMacAddress == texts[0])
                 return true;
 
@@ -146,7 +146,7 @@ bool BluetoothConnection::ISNewText(const char *dev, const char *name, char *tex
                 }
                 else {
                     LOG_WARN("Serial number selected. You must reconnect TicFocuser.");
-                    BtMacAddressTP.s = IPS_BUSY;                    
+                    BtMacAddressTP.s = IPS_BUSY;
                 }
 
             }
@@ -154,7 +154,7 @@ bool BluetoothConnection::ISNewText(const char *dev, const char *name, char *tex
                 IUUpdateText(&BtMacAddressTP, texts, names, n);
                 BtMacAddressTP.s = requiredBtMacAddress.empty()? IPS_IDLE: IPS_OK;
             }
-            
+
             IDSetText(&BtMacAddressTP, nullptr);
 
             return true;

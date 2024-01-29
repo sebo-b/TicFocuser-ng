@@ -12,6 +12,17 @@ Reasons to use tic-arduino over [tic-usb library](https://github.com/pololu/polo
 - it doesn't depend on Pololu [libusbp library](https://github.com/pololu/libusbp),
 - it is light and comes without external dependencies (except regular libusb for USB connection).
 
-Modified Pololu createdfiles are LICENSE.txt, TicBase.h and TicBase.cpp. TicBase.h and .cpp are renamed from Tic.h and Tic.cpp to not create conflicts with pololu-tic-software library.
+Slightly modified Pololu created files are:
+- LICENSE.txt,
+- TicBase.h (renamed from Tic.h to to not create conflicts with pololu-tic-software library)
+- TicBase.cpp (renamed from Tic.cpp to to not create conflicts with pololu-tic-software library)
 
-All changes of code are published on the same license as the original library, which is MIT. 
+Some content of tic_internal.h and tic_names.c from [tic-usb library](https://github.com/pololu/pololu-tic-software) is copied into:
+- TicDefs.h
+- TicDefs.cpp
+
+All changes of code are published on the same license as the original library, which is MIT.
+
+The latest intake was taken from the following versions:
+- tic-arduino fa3f105bc0dd6085dc3af20f55deae8178f42610  (Wed Jul 28 15:11:57 2021 -0700)
+- tic-usb 17e24ab81481ace02101c658945733de24a6ddea (Fri Jul 14 13:28:08 2023 -0700)

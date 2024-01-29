@@ -26,7 +26,7 @@ UsbConnectionBase::UsbConnectionBase(const char* serialNFieldName, INDI::Default
     Interface(dev, CONNECTION_USB)
 {
     const size_t MAX_SERIAL_NUMBER = 20; // serial number has 8 characters, 20 is super safe
-    char serialNumber[MAX_SERIAL_NUMBER];    
+    char serialNumber[MAX_SERIAL_NUMBER];
 
     if (IUGetConfigText(dev->getDeviceName(), "TIC_SERIAL_TP", "TIC_SERIAL_NUMBER", serialNumber, MAX_SERIAL_NUMBER)) {
         serialNumber[0] = '\0';
@@ -43,11 +43,11 @@ UsbConnectionBase::UsbConnectionBase(const char* serialNFieldName, INDI::Default
                      IP_RW, 60, IPS_IDLE);
 };
 
-UsbConnectionBase::~UsbConnectionBase() 
+UsbConnectionBase::~UsbConnectionBase()
 {
 };
 
-bool UsbConnectionBase::Disconnect() 
+bool UsbConnectionBase::Disconnect()
 {
     IUSaveText(TicSerialNumberT, requiredSerialNumber.c_str());
     TicSerialNumberTP.s = requiredSerialNumber.empty()? IPS_IDLE: IPS_OK;
@@ -56,14 +56,14 @@ bool UsbConnectionBase::Disconnect()
     return true; //Connection::Interface::Disconnect();
 };
 
-void UsbConnectionBase::Activated() 
+void UsbConnectionBase::Activated()
 {
-    m_Device->defineText(&TicSerialNumberTP);
+    m_Device->defineProperty(&TicSerialNumberTP);
 
     //Connection::Interface::Activated();
 };
 
-void UsbConnectionBase::Deactivated() 
+void UsbConnectionBase::Deactivated()
 {
     m_Device->deleteProperty(TicSerialNumberTP.name);
 
@@ -94,7 +94,7 @@ bool UsbConnectionBase::ISNewText(const char *dev, const char *name, char *texts
     if (!strcmp(dev, m_Device->getDeviceName()))
     {
         if (!strcmp(name, TicSerialNumberTP.name)) {
-            
+
             if (requiredSerialNumber == texts[0])
                 return true;
 
@@ -107,7 +107,7 @@ bool UsbConnectionBase::ISNewText(const char *dev, const char *name, char *texts
                 }
                 else {
                     LOG_WARN("Serial number selected. You must reconnect TicFocuser.");
-                    TicSerialNumberTP.s = IPS_BUSY;                    
+                    TicSerialNumberTP.s = IPS_BUSY;
                 }
 
             }
@@ -115,7 +115,7 @@ bool UsbConnectionBase::ISNewText(const char *dev, const char *name, char *texts
                 IUUpdateText(&TicSerialNumberTP, texts, names, n);
                 TicSerialNumberTP.s = requiredSerialNumber.empty()? IPS_IDLE: IPS_OK;
             }
-            
+
             IDSetText(&TicSerialNumberTP, nullptr);
 
             return true;

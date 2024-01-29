@@ -3,7 +3,7 @@
 #include "TicDefs.h"
 #include "TicBase.h"
 
-// copied from tic_protocol.h and modified to use TicBase.h
+// copied from pololu-tic-software/include/tic_protocol.h and modified to use TicBase.h
 #define TIC_ERROR_INTENTIONALLY_DEENERGIZED       (int)TicError::IntentionallyDeenergized
 #define TIC_ERROR_MOTOR_DRIVER_ERROR              (int)TicError::MotorDriverError
 #define TIC_ERROR_LOW_VIN                         (int)TicError::LowVin

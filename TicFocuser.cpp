@@ -149,10 +149,10 @@ bool TicFocuser::updateProperties()
 
     if (isConnected())
     {
-        defineSwitch(&EnergizeFocuserSP);
-        defineSwitch(&FocusParkingModeSP);
-        defineText(&InfoSP);
-        defineText(&InfoErrorSP);
+        defineProperty(&EnergizeFocuserSP);
+        defineProperty(&FocusParkingModeSP);
+        defineProperty(&InfoSP);
+        defineProperty(&InfoErrorSP);
     }
     else
     {
@@ -174,7 +174,7 @@ bool TicFocuser::ISNewSwitch(const char *dev, const char *name, ISState *states,
 {
     // first we check if it's for our device
     if (!strcmp(dev, getDeviceName()))
-    {    
+    {
         // handle parking mode
         if(!strcmp(name, FocusParkingModeSP.name))
         {
@@ -214,7 +214,7 @@ bool TicFocuser::saveConfigItems(FILE *fp)
     return true;
 }
 
-bool TicFocuser::Disconnect() 
+bool TicFocuser::Disconnect()
 {
     // park focuser
     if (FocusParkingModeS[0].s != ISS_ON) {
@@ -227,7 +227,7 @@ bool TicFocuser::Disconnect()
     return Focuser::Disconnect();
 }
 
-bool TicFocuser::Connect() 
+bool TicFocuser::Connect()
 {
     bool res = Focuser::Connect();
 
@@ -238,12 +238,12 @@ bool TicFocuser::Connect()
     return res;
 }
 
-void TicFocuser::TimerHit() 
+void TicFocuser::TimerHit()
 {
     if (!isConnected())
         return;
 
-    TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
+    TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());
     TicDriverInterface& driverInterface = conn->getTicDriverInterface();
 
     TicDriverInterface::TicVariables ticVariables;
@@ -289,7 +289,7 @@ void TicFocuser::TimerHit()
         IDSetText(&InfoSP, nullptr);
 
         /***** INFO_TAB > Error */
-        for (size_t i = 0; i < tic_error_names_ui_size; ++i) 
+        for (size_t i = 0; i < tic_error_names_ui_size; ++i)
         {
             if (tic_error_names_ui[i].code & ticVariables.errorStatus)
                 IUSaveText(&InfoErrorS[i], "Error");
@@ -304,15 +304,15 @@ void TicFocuser::TimerHit()
         lastTimerHitError = true;
     }
 
-    SetTimer(POLLMS);
+    SetTimer(getCurrentPollingPeriod());
 }
 
 bool TicFocuser::energizeFocuser()
 {
-    TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
+    TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());
     TicDriverInterface& driverInterface = conn->getTicDriverInterface();
 
-    if (!driverInterface.energize()) 
+    if (!driverInterface.energize())
     {
         LOGF_ERROR("Cannot energize motor. Error: %s", driverInterface.getLastErrorMsg());
         return false;
@@ -330,7 +330,7 @@ bool TicFocuser::energizeFocuser()
 
 bool TicFocuser::deenergizeFocuser()
 {
-    TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
+    TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());
     TicDriverInterface& driverInterface = conn->getTicDriverInterface();
 
     if (!driverInterface.deenergize())
@@ -346,9 +346,9 @@ bool TicFocuser::deenergizeFocuser()
     return true;
 }
 
-bool TicFocuser::SyncFocuser(uint32_t ticks) 
+bool TicFocuser::SyncFocuser(uint32_t ticks)
 {
-    TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
+    TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());
     TicDriverInterface& driverInterface = conn->getTicDriverInterface();
 
     if (!driverInterface.haltAndSetPosition(ticks))
@@ -361,10 +361,10 @@ bool TicFocuser::SyncFocuser(uint32_t ticks)
 }
 
 
-bool TicFocuser::AbortFocuser() 
+bool TicFocuser::AbortFocuser()
 {
 
-    TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
+    TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());
     TicDriverInterface& driverInterface = conn->getTicDriverInterface();
 
     if (!driverInterface.haltAndHold())
@@ -406,7 +406,7 @@ IPState TicFocuser::MoveRelFocuser(FocusDirection dir, uint32_t ticks)
 }
 
 IPState TicFocuser::MoveAbsFocuser(uint32_t ticks)
-{ 
+{
     if (ticks == FocusAbsPosN[0].value)
     {
         return IPS_OK;
@@ -438,7 +438,7 @@ IPState TicFocuser::MoveAbsFocuser(uint32_t ticks)
         return IPS_ALERT;
     }
 
-    TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());    
+    TicConnectionInterface* conn = dynamic_cast<TicConnectionInterface*>(getActiveConnection());
     TicDriverInterface& driverInterface = conn->getTicDriverInterface();
 
     if (!driverInterface.setTargetPosition(ticks))
@@ -446,7 +446,7 @@ IPState TicFocuser::MoveAbsFocuser(uint32_t ticks)
         LOGF_ERROR("Cannot set target position. Error: %s", driverInterface.getLastErrorMsg());
         return IPS_ALERT;
     }
-  
+
     return IPS_BUSY;
 }
 

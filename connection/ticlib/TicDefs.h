@@ -16,7 +16,7 @@
 #define TIC_PRODUCT_ID_T249 0x00C9
 #define TIC_PRODUCT_ID_36V4 0x00CB
 
-// copied from pololu-tic-software/tic/tic_internal.h
+// copied from pololu-tic-software/lib/tic_internal.h
 typedef struct tic_name
 {
   const char * name;
@@ -25,6 +25,7 @@ typedef struct tic_name
 
 // copied from pololu-tic-software/lib/tic_names.c
 extern const tic_name tic_error_names_ui[];
+// added
 extern const size_t tic_error_names_ui_size;
 
 // copied from pololu-tic-software/include/tic.h

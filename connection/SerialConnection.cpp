@@ -38,7 +38,7 @@ SerialConnection::SerialConnection(INDI::DefaultDevice *dev):
     });
 }
 
-SerialConnection::~SerialConnection() 
+SerialConnection::~SerialConnection()
 {
 //    delete ticDriverInterface;
 //    delete ticSerial;
@@ -63,25 +63,25 @@ bool SerialConnection::Connect()
 //
 
     }
-    
+
     return res;
 }
 
 
-bool BluetoothConnection::Disconnect() 
-{ 
+bool BluetoothConnection::Disconnect()
+{
     streamBT->disconnect();
 
     LOG_INFO("Bluetooth disconnected.");
     return true;
 }
 
-void BluetoothConnection::Activated() 
+void BluetoothConnection::Activated()
 {
-    m_Device->defineText(&BtMacAddressTP);
+    m_Device->defineProperty(&BtMacAddressTP);
 }
 
-void BluetoothConnection::Deactivated() 
+void BluetoothConnection::Deactivated()
 {
     m_Device->deleteProperty(BtMacAddressTP.name);
 }
@@ -110,7 +110,7 @@ bool BluetoothConnection::ISNewText(const char *dev, const char *name, char *tex
     if (!strcmp(dev, m_Device->getDeviceName()))
     {
         if (!strcmp(name, BtMacAddressTP.name)) {
-            
+
             if (requiredBtMacAddress == texts[0])
                 return true;
 
@@ -123,7 +123,7 @@ bool BluetoothConnection::ISNewText(const char *dev, const char *name, char *tex
                 }
                 else {
                     LOG_WARN("Serial number selected. You must reconnect TicFocuser.");
-                    BtMacAddressTP.s = IPS_BUSY;                    
+                    BtMacAddressTP.s = IPS_BUSY;
                 }
 
             }
@@ -131,7 +131,7 @@ bool BluetoothConnection::ISNewText(const char *dev, const char *name, char *tex
                 IUUpdateText(&BtMacAddressTP, texts, names, n);
                 BtMacAddressTP.s = requiredBtMacAddress.empty()? IPS_IDLE: IPS_OK;
             }
-            
+
             IDSetText(&BtMacAddressTP, nullptr);
 
             return true;

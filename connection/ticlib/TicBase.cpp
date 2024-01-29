@@ -169,7 +169,7 @@ void TicSerial::sendCommandHeader(TicCommand cmd)
   else
   {
     // Pololu protocol
-    _stream->write(0xAA);
+    _stream->write((uint8_t)0xAA);
     serialW7(_deviceNumber);
     serialW7((uint8_t)cmd);
   }
