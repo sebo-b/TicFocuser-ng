@@ -107,26 +107,26 @@ bool TicFocuser::initProperties()
 {
     INDI::Focuser::initProperties();
 
-    IUFillSwitch(&FocusParkingModeS[0],"FOCUS_PARKON","Enable",ISS_OFF);
-    IUFillSwitch(&FocusParkingModeS[1],"FOCUS_PARKOFF","Disable",ISS_ON);
-    IUFillSwitchVector(&FocusParkingModeSP,FocusParkingModeS,2,getDeviceName(),"FOCUS_PARK_MODE","Parking Mode",OPTIONS_TAB,IP_RW,ISR_1OFMANY,60,IPS_IDLE);
+    FocusParkingModeSP[FOCUS_PARKON].fill("FOCUS_PARKON","Enable",ISS_OFF);
+    FocusParkingModeSP[FOCUS_PARKOFF].fill("FOCUS_PARKOFF","Disable",ISS_ON);
+    FocusParkingModeSP.fill(getDeviceName(),"FOCUS_PARK_MODE","Parking Mode",OPTIONS_TAB,IP_RW,ISR_1OFMANY,60,IPS_IDLE);
 
-    IUFillSwitch(&EnergizeFocuserS[0],"ENERGIZE_FOCUSER","Energize focuser",ISS_OFF);
-    IUFillSwitch(&EnergizeFocuserS[1],"DEENERGIZE_FOCUSER","De-energize focuser",ISS_OFF);
-    IUFillSwitchVector(&EnergizeFocuserSP,EnergizeFocuserS,2,getDeviceName(),"ENERGIZE_FOCUSER","Energize",MAIN_CONTROL_TAB,IP_RW,ISR_1OFMANY,60,IPS_IDLE);
+    EnergizeFocuserSP[ENERGIZE_FOCUSER].fill("ENERGIZE_FOCUSER","Energize focuser",ISS_OFF);
+    EnergizeFocuserSP[DEENERGIZE_FOCUSER].fill("DEENERGIZE_FOCUSER","De-energize focuser",ISS_OFF);
+    EnergizeFocuserSP.fill(getDeviceName(),"ENERGIZE_FOCUSER","Energize",MAIN_CONTROL_TAB,IP_RW,ISR_1OFMANY,60,IPS_IDLE);
 
     /***** INFO_TAB */
-    IUFillText(&InfoS[VIN_VOLTAGE], "VIN_VOLTAGE", "Vin voltage", "");
-    IUFillText(&InfoS[CURRENT_LIMIT], "CURRENT_LIMIT", "Current limit", "");
-    IUFillText(&InfoS[STEP_MODE], "STEP_MODE", "Step mode", "");
-    IUFillText(&InfoS[ENERGIZED], "ENERGIZED", "Energized", "");
-    IUFillText(&InfoS[OPERATION_STATE], "OPERATION_STATE", "Operational state", "");
-    IUFillTextVector(&InfoSP, InfoS, InfoTabSize, getDeviceName(), "TIC_INFO", "Tic Info", INFO_TAB, IP_RO, 60, IPS_IDLE);
+    InfoSP[VIN_VOLTAGE].fill( "VIN_VOLTAGE", "Vin voltage", "");
+    InfoSP[CURRENT_LIMIT].fill("CURRENT_LIMIT", "Current limit", "");
+    InfoSP[STEP_MODE].fill("STEP_MODE", "Step mode", "");
+    InfoSP[ENERGIZED].fill("ENERGIZED", "Energized", "");
+    InfoSP[OPERATION_STATE].fill("OPERATION_STATE", "Operational state", "");
+    InfoSP.fill(getDeviceName(), "TIC_INFO", "Tic Info", INFO_TAB, IP_RO, 60, IPS_IDLE);
 
     /***** INFO_TAB > Error */
     for (size_t i = 0; i < tic_error_names_ui_size; ++i)
-        IUFillText(&InfoErrorS[i], tic_error_names_ui[i].name, tic_error_names_ui[i].name, "");
-    IUFillTextVector(&InfoErrorSP, InfoErrorS, tic_error_names_ui_size, getDeviceName(), "TIC_INFO_ERROR", "Tic Error", INFO_TAB, IP_RO, 60, IPS_IDLE);
+        InfoErrorSP[i].fill(tic_error_names_ui[i].name, tic_error_names_ui[i].name, "");
+    InfoErrorSP.fill(getDeviceName(), "TIC_INFO_ERROR", "Tic Error", INFO_TAB, IP_RO, 60, IPS_IDLE);
 
     /***** Connections */
 #ifdef WITH_LIBTIC
@@ -149,17 +149,17 @@ bool TicFocuser::updateProperties()
 
     if (isConnected())
     {
-        defineProperty(&EnergizeFocuserSP);
-        defineProperty(&FocusParkingModeSP);
-        defineProperty(&InfoSP);
-        defineProperty(&InfoErrorSP);
+        defineProperty(EnergizeFocuserSP);
+        defineProperty(FocusParkingModeSP);
+        defineProperty(InfoSP);
+        defineProperty(InfoErrorSP);
     }
     else
     {
-        deleteProperty(FocusParkingModeSP.name);
-        deleteProperty(EnergizeFocuserSP.name);
-        deleteProperty(InfoSP.name);
-        deleteProperty(InfoErrorSP.name);
+        deleteProperty(FocusParkingModeSP);
+        deleteProperty(EnergizeFocuserSP);
+        deleteProperty(InfoSP);
+        deleteProperty(InfoErrorSP);
     }
 
     return true;
@@ -178,9 +178,9 @@ bool TicFocuser::ISNewSwitch(const char *dev, const char *name, ISState *states,
         // handle parking mode
         if(!strcmp(name, FocusParkingModeSP.name))
         {
-            IUUpdateSwitch(&FocusParkingModeSP, states, names, n);
-            FocusParkingModeSP.s = IPS_OK;
-            IDSetSwitch(&FocusParkingModeSP, NULL);
+            FocusParkingModeSP.update(states, names, n);
+            FocusParkingModeSP.setState(IPS_OK);
+            FocusParkingModeSP.apply();
             return true;
         }
 
@@ -193,8 +193,8 @@ bool TicFocuser::ISNewSwitch(const char *dev, const char *name, ISState *states,
             else
                 res = deenergizeFocuser();
 
-            EnergizeFocuserSP.s = res? IPS_OK: IPS_ALERT;
-            IDSetSwitch(&EnergizeFocuserSP, NULL);
+            EnergizeFocuserSP.setState(res? IPS_OK: IPS_ALERT);
+            EnergizeFocuserSP.apply();
 
             return true;
         }
@@ -209,7 +209,7 @@ bool TicFocuser::saveConfigItems(FILE *fp)
     if (!Focuser::saveConfigItems(fp))
         return false;
 
-    IUSaveConfigSwitch(fp, &FocusParkingModeSP);
+    FocusParkingModeSP.save(fp);
 
     return true;
 }
@@ -217,7 +217,7 @@ bool TicFocuser::saveConfigItems(FILE *fp)
 bool TicFocuser::Disconnect()
 {
     // park focuser
-    if (FocusParkingModeS[0].s != ISS_ON) {
+    if (FocusParkingModeSP[FOCUS_PARKON].getState != ISS_ON) {
         LOG_INFO("Parking mode disabled, parking not performed.");
     }
     else {
@@ -253,50 +253,50 @@ void TicFocuser::TimerHit()
 
         lastTimerHitError = false;
 
-        FocusAbsPosN[0].value = ticVariables.currentPosition;
-        FocusSyncN[0].value = ticVariables.currentPosition;
+        FocusAbsPosNP[0].setValue(ticVariables.currentPosition);
+        FocusSyncNP[0].setValue(ticVariables.currentPosition);
 
-        if (FocusAbsPosNP.s == IPS_BUSY) {
+        if (FocusAbsPosNP.getState() == IPS_BUSY) {
 
             if (moveRelInitialValue >= 0) {
-                FocusRelPosN[0].value = abs( moveRelInitialValue - ticVariables.currentPosition);
+                FocusRelPosNP[0].setValue(abs(moveRelInitialValue - ticVariables.currentPosition));
             }
 
             if ( ticVariables.currentPosition ==  ticVariables.targetPosition) {
-                FocusAbsPosNP.s = IPS_OK;
-                FocusRelPosNP.s = IPS_OK;
+                FocusAbsPosNP.setState(IPS_OK);
+                FocusRelPosNP.setState(IPS_OK);
                 moveRelInitialValue = -1;
             }
         }
 
-        IDSetNumber(&FocusAbsPosNP, nullptr);
-        IDSetNumber(&FocusRelPosNP, nullptr);
-        IDSetNumber(&FocusSyncNP, nullptr);
+        FocusAbsPosNP.apply();
+        FocusRelPosNP.apply();
+        FocusSyncNP.apply();
 
         /** INFO_TAB */
         char buf[20];
         std::snprintf(buf,sizeof(buf),"%.2f V", ((double)ticVariables.vinVoltage)/1000);
-        IUSaveText( &InfoS[VIN_VOLTAGE], buf);
+        InfoSP[VIN_VOLTAGE]setText(buf);
         if (ticVariables.currentLimit > 1000)
             std::snprintf(buf,sizeof(buf),"%.2f A", ((double)ticVariables.currentLimit)/1000);
         else
             std::snprintf(buf,sizeof(buf),"%d mA", ticVariables.currentLimit);
 
-        IUSaveText( &InfoS[CURRENT_LIMIT], buf);
-        IUSaveText( &InfoS[ENERGIZED], ticVariables.energized? "Yes": "No");
-        IUSaveText( &InfoS[STEP_MODE], ticVariables.stepMode.c_str());
-        IUSaveText( &InfoS[OPERATION_STATE], ticVariables.operationalState.c_str());
-        IDSetText(&InfoSP, nullptr);
+        InfoSP[CURRENT_LIMIT].setText(buf);
+        InfoSP[ENERGIZED].setText(ticVariables.energized? "Yes": "No");
+        InfoSP[STEP_MODE].setText(ticVariables.stepMode.c_str());
+        InfoSP[OPERATION_STATE].setText(ticVariables.operationalState.c_str());
+        InfoSP.apply(nullptr);
 
         /***** INFO_TAB > Error */
         for (size_t i = 0; i < tic_error_names_ui_size; ++i)
         {
             if (tic_error_names_ui[i].code & ticVariables.errorStatus)
-                IUSaveText(&InfoErrorS[i], "Error");
+                InfoErrorSP[i].setText("Error");
             else
-                IUSaveText(&InfoErrorS[i], "-");
+                InfoErrorSP[i].setText("-");
         }
-        IDSetText(&InfoErrorSP, nullptr);
+        InfoErrorSP.apply(nullptr);
 
     }
     else if (!lastTimerHitError) {
@@ -388,7 +388,7 @@ IPState TicFocuser::MoveFocuser(FocusDirection dir, int speed, uint16_t duration
 
 IPState TicFocuser::MoveRelFocuser(FocusDirection dir, uint32_t ticks)
 {
-    int32_t absTicks = FocusAbsPosN[0].value;
+    int32_t absTicks = FocusAbsPosNP[0].getValue();
     int32_t targetTicks;
     if (dir == FOCUS_OUTWARD)
         targetTicks = absTicks + ticks;
@@ -399,40 +399,40 @@ IPState TicFocuser::MoveRelFocuser(FocusDirection dir, uint32_t ticks)
 
     moveRelInitialValue = ret == IPS_BUSY? absTicks: -1;
 
-    FocusAbsPosNP.s = ret;
-    IDSetNumber(&FocusAbsPosNP, nullptr);
+    FocusAbsPosNP.setState(ret);
+    FocusAbsPosNP.apply(nullptr);
 
     return ret;
 }
 
 IPState TicFocuser::MoveAbsFocuser(uint32_t ticks)
 {
-    if (ticks == FocusAbsPosN[0].value)
+    if (ticks == FocusAbsPosNP[0].getValue)
     {
         return IPS_OK;
     }
-    else if (ticks > FocusAbsPosN[0].value)
+    else if (ticks > FocusAbsPosNP[0].getValue)
     {
-        if(lastFocusDir == FOCUS_INWARD && FocusBacklashS[INDI_ENABLED].s == ISS_ON)
+        if(lastFocusDir == FOCUS_INWARD && FocusBacklashSP[INDI_ENABLED].getState() == ISS_ON)
         {
             uint32_t nominal = ticks;
-            ticks = static_cast<uint32_t>(std::min(ticks + FocusBacklashN[0].value, FocusAbsPosN[0].max));
+            ticks = static_cast<uint32_t>(std::min(ticks + FocusBacklashNP[0].getValue, FocusAbsPosNP[0].max));
             LOGF_INFO("Apply backlash (in->out): +%d", ticks - nominal);
         }
         lastFocusDir = FOCUS_OUTWARD;
     }
-    else if (ticks < FocusAbsPosN[0].value && FocusBacklashS[INDI_ENABLED].s == ISS_ON)
+    else if (ticks < FocusAbsPosNP[0].getValue && FocusBacklashSP[INDI_ENABLED].getState() == ISS_ON)
     {
         if(lastFocusDir == FOCUS_OUTWARD)
         {
             uint32_t nominal = ticks;
-            ticks = static_cast<uint32_t>(std::max(ticks - FocusBacklashN[0].value, FocusAbsPosN[0].min));
+            ticks = static_cast<uint32_t>(std::max(ticks - FocusBacklashNP[0].getValue, FocusAbsPosNP[0].min));
             LOGF_INFO("Apply backlash (out->in): %d", ticks - nominal);
         }
         lastFocusDir = FOCUS_INWARD;
     }
 
-    if (ticks < FocusAbsPosN[0].min || ticks > FocusAbsPosN[0].max)
+    if (ticks < FocusAbsPosNP[0].min || ticks > FocusAbsPosNP[0].max)
     {
         LOGF_ERROR("Requested position is out of range: %d", ticks);
         return IPS_ALERT;
