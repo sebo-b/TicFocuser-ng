@@ -107,26 +107,26 @@ bool TicFocuser::initProperties()
 {
     INDI::Focuser::initProperties();
 
-    FocusParkingModeSP[FOCUS_PARKON].fill("FOCUS_PARKON","Enable",ISS_OFF);
-    FocusParkingModeSP[FOCUS_PARKOFF].fill("FOCUS_PARKOFF","Disable",ISS_ON);
-    FocusParkingModeSP.fill(getDeviceName(),"FOCUS_PARK_MODE","Parking Mode",OPTIONS_TAB,IP_RW,ISR_1OFMANY,60,IPS_IDLE);
+    IUFillSwitch(&FocusParkingModeS[0],"FOCUS_PARKON","Enable",ISS_OFF);
+    IUFillSwitch(&FocusParkingModeS[1],"FOCUS_PARKOFF","Disable",ISS_ON);
+    IUFillSwitchVector(&FocusParkingModeSP,FocusParkingModeS,2,getDeviceName(),"FOCUS_PARK_MODE","Parking Mode",OPTIONS_TAB,IP_RW,ISR_1OFMANY,60,IPS_IDLE);
 
-    EnergizeFocuserSP[ENERGIZE_FOCUSER].fill("ENERGIZE_FOCUSER","Energize focuser",ISS_OFF);
-    EnergizeFocuserSP[DEENERGIZE_FOCUSER].fill("DEENERGIZE_FOCUSER","De-energize focuser",ISS_OFF);
-    EnergizeFocuserSP.fill(getDeviceName(),"ENERGIZE_FOCUSER","Energize",MAIN_CONTROL_TAB,IP_RW,ISR_1OFMANY,60,IPS_IDLE);
+    IUFillSwitch(&EnergizeFocuserS[0],"ENERGIZE_FOCUSER","Energize focuser",ISS_OFF);
+    IUFillSwitch(&EnergizeFocuserS[1],"DEENERGIZE_FOCUSER","De-energize focuser",ISS_OFF);
+    IUFillSwitchVector(&EnergizeFocuserSP,EnergizeFocuserS,2,getDeviceName(),"ENERGIZE_FOCUSER","Energize",MAIN_CONTROL_TAB,IP_RW,ISR_1OFMANY,60,IPS_IDLE);
 
     /***** INFO_TAB */
-    InfoSP[VIN_VOLTAGE].fill( "VIN_VOLTAGE", "Vin voltage", "");
-    InfoSP[CURRENT_LIMIT].fill("CURRENT_LIMIT", "Current limit", "");
-    InfoSP[STEP_MODE].fill("STEP_MODE", "Step mode", "");
-    InfoSP[ENERGIZED].fill("ENERGIZED", "Energized", "");
-    InfoSP[OPERATION_STATE].fill("OPERATION_STATE", "Operational state", "");
-    InfoSP.fill(getDeviceName(), "TIC_INFO", "Tic Info", INFO_TAB, IP_RO, 60, IPS_IDLE);
+    IUFillText(&InfoS[VIN_VOLTAGE], "VIN_VOLTAGE", "Vin voltage", "");
+    IUFillText(&InfoS[CURRENT_LIMIT], "CURRENT_LIMIT", "Current limit", "");
+    IUFillText(&InfoS[STEP_MODE], "STEP_MODE", "Step mode", "");
+    IUFillText(&InfoS[ENERGIZED], "ENERGIZED", "Energized", "");
+    IUFillText(&InfoS[OPERATION_STATE], "OPERATION_STATE", "Operational state", "");
+    IUFillTextVector(&InfoSP, InfoS, InfoTabSize, getDeviceName(), "TIC_INFO", "Tic Info", INFO_TAB, IP_RO, 60, IPS_IDLE);
 
     /***** INFO_TAB > Error */
     for (size_t i = 0; i < tic_error_names_ui_size; ++i)
-        InfoErrorSP[i].fill(tic_error_names_ui[i].name, tic_error_names_ui[i].name, "");
-    InfoErrorSP.fill(getDeviceName(), "TIC_INFO_ERROR", "Tic Error", INFO_TAB, IP_RO, 60, IPS_IDLE);
+        IUFillText(&InfoErrorS[i], tic_error_names_ui[i].name, tic_error_names_ui[i].name, "");
+    IUFillTextVector(&InfoErrorSP, InfoErrorS, tic_error_names_ui_size, getDeviceName(), "TIC_INFO_ERROR", "Tic Error", INFO_TAB, IP_RO, 60, IPS_IDLE);
 
     /***** Connections */
 #ifdef WITH_LIBTIC
@@ -149,17 +149,17 @@ bool TicFocuser::updateProperties()
 
     if (isConnected())
     {
-        defineProperty(EnergizeFocuserSP);
-        defineProperty(FocusParkingModeSP);
-        defineProperty(InfoSP);
-        defineProperty(InfoErrorSP);
+        defineProperty(&EnergizeFocuserSP);
+        defineProperty(&FocusParkingModeSP);
+        defineProperty(&InfoSP);
+        defineProperty(&InfoErrorSP);
     }
     else
     {
-        deleteProperty(FocusParkingModeSP);
-        deleteProperty(EnergizeFocuserSP);
-        deleteProperty(InfoSP);
-        deleteProperty(InfoErrorSP);
+        deleteProperty(FocusParkingModeSP.name);
+        deleteProperty(EnergizeFocuserSP.name);
+        deleteProperty(InfoSP.name);
+        deleteProperty(InfoErrorSP.name);
     }
 
     return true;
@@ -178,9 +178,9 @@ bool TicFocuser::ISNewSwitch(const char *dev, const char *name, ISState *states,
         // handle parking mode
         if(!strcmp(name, FocusParkingModeSP.name))
         {
-            FocusParkingModeSP.update(states, names, n);
-            FocusParkingModeSP.setState(IPS_OK);
-            FocusParkingModeSP.apply();
+            IUUpdateSwitch(&FocusParkingModeSP, states, names, n);
+            FocusParkingModeSP.s = IPS_OK;
+            IDSetSwitch(&FocusParkingModeSP, NULL);
             return true;
         }
 
@@ -193,8 +193,8 @@ bool TicFocuser::ISNewSwitch(const char *dev, const char *name, ISState *states,
             else
                 res = deenergizeFocuser();
 
-            EnergizeFocuserSP.setState(res? IPS_OK: IPS_ALERT);
-            EnergizeFocuserSP.apply();
+            EnergizeFocuserSP.s = res? IPS_OK: IPS_ALERT;
+            IDSetSwitch(&EnergizeFocuserSP, NULL);
 
             return true;
         }
@@ -217,7 +217,7 @@ bool TicFocuser::saveConfigItems(FILE *fp)
 bool TicFocuser::Disconnect()
 {
     // park focuser
-    if (FocusParkingModeSP[FOCUS_PARKON].getState != ISS_ON) {
+    if (FocusParkingModeS[0].s != ISS_ON) {
         LOG_INFO("Parking mode disabled, parking not performed.");
     }
     else {
@@ -276,27 +276,27 @@ void TicFocuser::TimerHit()
         /** INFO_TAB */
         char buf[20];
         std::snprintf(buf,sizeof(buf),"%.2f V", ((double)ticVariables.vinVoltage)/1000);
-        InfoSP[VIN_VOLTAGE]setText(buf);
+        IUSaveText( &InfoS[VIN_VOLTAGE], buf);
         if (ticVariables.currentLimit > 1000)
             std::snprintf(buf,sizeof(buf),"%.2f A", ((double)ticVariables.currentLimit)/1000);
         else
             std::snprintf(buf,sizeof(buf),"%d mA", ticVariables.currentLimit);
 
-        InfoSP[CURRENT_LIMIT].setText(buf);
-        InfoSP[ENERGIZED].setText(ticVariables.energized? "Yes": "No");
-        InfoSP[STEP_MODE].setText(ticVariables.stepMode.c_str());
-        InfoSP[OPERATION_STATE].setText(ticVariables.operationalState.c_str());
-        InfoSP.apply(nullptr);
+        IUSaveText( &InfoS[CURRENT_LIMIT], buf);
+        IUSaveText( &InfoS[ENERGIZED], ticVariables.energized? "Yes": "No");
+        IUSaveText( &InfoS[STEP_MODE], ticVariables.stepMode.c_str());
+        IUSaveText( &InfoS[OPERATION_STATE], ticVariables.operationalState.c_str());
+        IDSetText(&InfoSP, nullptr);
 
         /***** INFO_TAB > Error */
         for (size_t i = 0; i < tic_error_names_ui_size; ++i)
         {
             if (tic_error_names_ui[i].code & ticVariables.errorStatus)
-                InfoErrorSP[i].setText("Error");
+                IUSaveText(&InfoErrorS[i], "Error");
             else
-                InfoErrorSP[i].setText("-");
+                IUSaveText(&InfoErrorS[i], "-");
         }
-        InfoErrorSP.apply(nullptr);
+        IDSetText(&InfoErrorSP, nullptr);
 
     }
     else if (!lastTimerHitError) {
