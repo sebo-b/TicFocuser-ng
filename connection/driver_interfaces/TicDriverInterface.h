@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define TICDRIVERINTERFACE_H
 
 #include <string>
+#include <cstdint>
 
 class TicDriverInterface
 {
